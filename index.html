@@ -14,7 +14,7 @@
         .time-slot-btn { padding: 8px 12px; border: 1px solid #7c5c9a; border-radius: 4px; background-color: #fff; color: #7c5c9a; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
         .time-slot-btn:hover { background-color: #e6e6fa; }
         .time-slot-btn.selected { background-color: #7c5c9a; color: #fff; border-color: #7c5c9a; }
-        .time-slot-btn:disabled { background-color: #f1ff1f; color: #ccc; cursor: not-allowed; border-color: #e0e0e0; }
+        .time-slot-btn:disabled { background-color: #f1f1f1; color: #ccc; cursor: not-allowed; border-color: #e0e0e0; }
         button[type="submit"] { background-color: #7c5c9a; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; transition: background-color 0.3s; }
         button[type="submit"]:hover:not(:disabled) { background-color: #6a4f83; }
         button[type="submit"]:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -52,17 +52,18 @@
 
     <script>
         // ***************************************************************
-        // !!! FINAL STABLE URLS FOR N8N.TIDAL-GROWTH.COM !!!
+        // FINAL STABLE URLs FOR N8N.TIDAL-GROWTH.COM
+        // Base URL uses HTTP because the Cloudflare proxy is disabled for this port.
         // ***************************************************************
-        const BASE_URL = "https://n8n.tidal-growth.com:5678/webhook"; 
+        const BASE_URL = "http://n8n.tidal-growth.com:5678/webhook"; 
 
-        // 1. URL for the actual booking submission (Workflow 1)
+        // 1. URL for the actual booking submission (REMOVED - Not Built Yet)
         const BOOKING_WEBHOOK_URL = `${BASE_URL}/suarify-make-booking`; 
 
-        // 2. URL for checking availability slots (NEW Workflow 2)
+        // 2. URL for checking availability slots (ACTIVE - Workflow 2)
         const CHECKER_WEBHOOK_URL = `${BASE_URL}/check-availability-slots`; 
         
-        // --- Rest of the code remains the same as previously provided ---
+        // --- Core Elements ---
         const form = document.getElementById('bookingForm');
         const messageArea = document.getElementById('messageArea');
         const submitBtn = document.getElementById('submitBtn');
@@ -70,7 +71,7 @@
         const timeInputHidden = document.getElementById('time');
         const dateInput = document.getElementById('date');
 
-        // Define the master list of all possible slots
+        // Master list of all possible slots
         const masterSlots = [
             { display: "9:00 AM", value: "09:00" },
             { display: "10:00 AM", value: "10:00" },
@@ -103,11 +104,10 @@
                 const response = await fetch(`${CHECKER_WEBHOOK_URL}?date=${selectedDate}`);
                 
                 if (!response.ok) {
-                    // If the n8n server is offline or the URL is wrong
                     throw new Error('N8N Checker Webhook returned an error or could not be reached.');
                 }
 
-                // Expecting the N8N workflow to return a JSON array of available time values (e.g., ["09:00", "11:00"])
+                // Expecting the N8N workflow to return a JSON array of available time values
                 const availableSlotsValues = await response.json(); 
                 
                 // Now render the slots based on the available list
@@ -115,7 +115,7 @@
 
             } catch (error) {
                 console.error('Availability check failed:', error);
-                timeSlotContainer.innerHTML = '<p style="text-align:center; color:red;">Could not check slots. Please check your N8N server connection.</p>';
+                timeSlotContainer.innerHTML = '<p style="text-align:center; color:red;">Could not check slots. Check your N8N server connection or firewall settings.</p>';
                 submitBtn.disabled = true;
             }
         }
@@ -132,7 +132,6 @@
                 button.setAttribute('data-time', slot.value);
                 button.classList.add('time-slot-btn');
                 
-                // Check if the slot time is in the list returned by N8N
                 const isAvailable = availableTimeValues.includes(slot.value);
 
                 if (isAvailable) {
@@ -160,71 +159,15 @@
                 timeSlotContainer.appendChild(button);
             });
             
+            // NOTE: Submit button is disabled because Workflow 1 (Booking) is not built yet.
             if (anySlotsAvailable) {
-                 submitBtn.disabled = false;
+                 submitBtn.disabled = true; 
+                 showMessage('Slots available! The booking button is disabled until Workflow 1 is built.', 'message');
             } else {
                  timeSlotContainer.innerHTML = '<p style="text-align:center; color:#e06c75; font-weight: bold;">No slots available on this date. Please choose another.</p>';
+                 submitBtn.disabled = true;
             }
         }
-
-        // --- Form Submission Logic (Booking Workflow 1) ---
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            
-            if (!timeInputHidden.value) {
-                showMessage(timeInputHidden.getAttribute('data-error-msg') || 'Please select a time slot.', 'error');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
-            messageArea.style.display = 'none';
-
-            const bookingData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                date: dateInput.value,
-                time: timeInputHidden.value, 
-                source: 'GitHub Page Dynamic Booking Form' 
-            };
-
-            // Send data to the N8N Booking Webhook (Workflow 1)
-            fetch(BOOKING_WEBHOOK_URL, { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(bookingData),
-            })
-            .then(async response => {
-                let responseData;
-                try {
-                    responseData = await response.json();
-                } catch (e) {
-                    responseData = await response.text();
-                }
-
-                if (response.ok) {
-                    showMessage('Booking successful! We look forward to seeing you.', 'success');
-                    form.reset(); 
-                    timeInputHidden.value = ''; 
-                    // Re-check availability to reset buttons after successful booking
-                    checkAvailability(); 
-                } else {
-                    const errorMessage = responseData.message || responseData || 'An unknown error occurred.';
-                    showMessage(`Booking Failed: ${errorMessage}`, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Network Error:', error);
-                showMessage('Connection error. Please try again later.', 'error');
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Book Now';
-            });
-        });
 
         // --- Helper Functions ---
         function showMessage(message, type) {
@@ -233,12 +176,13 @@
             messageArea.style.display = 'block';
         }
 
-        // Initial setup on page load
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             dateInput.setAttribute('min', today);
-            // Initially render all master slots as if they are available (or wait for user input)
+            // Initially render a blank slate
             renderTimeSlots([]); 
+            submitBtn.disabled = true;
         });
 
     </script>
