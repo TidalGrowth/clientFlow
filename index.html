@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suarify Booking Form</title>
+    <title>Client Flow Booking Form</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
         .container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
@@ -25,7 +25,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Book Your Appointment</h2>
+        <h2>Client Flow Appointment Booking</h2> 
         <form id="bookingForm">
             <label for="name">Full Name</label>
             <input type="text" id="name" name="name" required>
@@ -52,10 +52,10 @@
 
     <script>
         // ***************************************************************
-        // FINAL STABLE URLs FOR N8N.TIDAL-GROWTH.COM
-        // Base URL uses HTTP because the Cloudflare proxy is disabled for this port.
+        // FINAL SECURE URLS
+        // BASE_URL is set to the HTTPS, port-free address via Nginx Proxy Manager
         // ***************************************************************
-        const BASE_URL = "http://n8n.tidal-growth.com:5678/webhook"; 
+        const BASE_URL = "https://n8n.tidal-growth.com/webhook"; 
 
         // 1. URL for the actual booking submission (REMOVED - Not Built Yet)
         const BOOKING_WEBHOOK_URL = `${BASE_URL}/suarify-make-booking`; 
@@ -159,10 +159,10 @@
                 timeSlotContainer.appendChild(button);
             });
             
-            // NOTE: Submit button is disabled because Workflow 1 (Booking) is not built yet.
+            // NOTE: Submit button is permanently disabled because Workflow 1 (Booking) is not built yet.
             if (anySlotsAvailable) {
                  submitBtn.disabled = true; 
-                 showMessage('Slots available! The booking button is disabled until Workflow 1 is built.', 'message');
+                 showMessage('Slots available! The booking button is disabled until the submission workflow is built.', 'message');
             } else {
                  timeSlotContainer.innerHTML = '<p style="text-align:center; color:#e06c75; font-weight: bold;">No slots available on this date. Please choose another.</p>';
                  submitBtn.disabled = true;
