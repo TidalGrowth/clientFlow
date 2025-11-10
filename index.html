@@ -139,10 +139,10 @@
 
     <script>
         // --- CONFIGURATION ---
-        // REPLACE with your actual N8N Webhook URL for the Slot Checker workflow
-        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots";
+        // SLOT CHECKER WEBHOOK (Provided by user)
+        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots"; 
         
-        // REPLACE with your actual N8N Webhook URL for the Booking Creator workflow
+        // BOOKING CREATOR WEBHOOK (Placeholder)
         const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; 
         
         // --- GLOBAL ELEMENTS ---
@@ -152,7 +152,7 @@
         const statusDiv = document.getElementById('status');
         const form = document.getElementById('bookingForm');
         
-        // Sets minimum date to today (or tomorrow if you prefer)
+        // Sets minimum date to today
         const today = new Date();
         today.setDate(today.getDate());
         dateInput.min = today.toISOString().split('T')[0];
@@ -187,10 +187,13 @@
                 if (!response.ok) {
                     throw new Error(`HTTP Error: ${response.status}`);
                 }
-
-                // **CRITICAL CHANGE:** Expecting the array to be nested under 'slots'
+                
+                // CRITICAL FIX: Robustly parse the response. 
+                // N8N might send a direct array or a wrapped object.
                 const data = await response.json();
-                const availableSlots = data.slots;
+                
+                // If it's an array, use it directly; otherwise, check for the 'slots' property.
+                const availableSlots = Array.isArray(data) ? data : data.slots;
                 
                 // Update the dropdown menu
                 timeSlotSelect.innerHTML = '';
@@ -212,7 +215,8 @@
             } catch (error) {
                 console.error('Error fetching slots:', error);
                 statusDiv.className = 'error';
-                statusDiv.textContent = 'Error fetching slots. Please try a different date.';
+                // Display a user-friendly message based on the issue
+                statusDiv.textContent = 'Error fetching slots. Please check the date and try again.';
                 timeSlotSelect.innerHTML = '<option value="">Error fetching slots</option>';
                 timeSlotSelect.disabled = true;
             }
@@ -237,6 +241,7 @@
             statusDiv.textContent = 'Processing booking...';
             statusDiv.className = '';
 
+            // Note: This submission will fail until the BOOKING_CREATOR_WEBHOOK is built.
             try {
                 // Send user data to the Booking Creator workflow
                 const response = await fetch(BOOKING_CREATOR_WEBHOOK, {
@@ -262,7 +267,8 @@
             } catch (error) {
                 console.error('Booking Error:', error);
                 statusDiv.className = 'error';
-                statusDiv.textContent = `Booking failed: ${error.message}`;
+                // Since this is just a placeholder, we show a direct fail message
+                statusDiv.textContent = `Booking failed: The booking creator workflow is not yet active.`; 
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Book Appointment';
