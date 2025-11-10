@@ -1,192 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Flow Booking Form</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; }
-        .container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; }
-        h2 { text-align: center; color: #333; margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-        input[type="text"], input[type="email"], input[type="tel"], input[type="date"] { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .time-slot-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .time-slot-btn { padding: 8px 12px; border: 1px solid #7c5c9a; border-radius: 4px; background-color: #fff; color: #7c5c9a; cursor: pointer; transition: background-color 0.2s, color 0.2s; }
-        .time-slot-btn:hover { background-color: #e6e6fa; }
-        .time-slot-btn.selected { background-color: #7c5c9a; color: #fff; border-color: #7c5c9a; }
-        .time-slot-btn:disabled { background-color: #f1f1f1; color: #ccc; cursor: not-allowed; border-color: #e0e0e0; }
-        button[type="submit"] { background-color: #7c5c9a; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; transition: background-color 0.3s; }
-        button[type="submit"]:hover:not(:disabled) { background-color: #6a4f83; }
-        button[type="submit"]:disabled { background-color: #ccc; cursor: not-allowed; }
-        .message { padding: 10px; border-radius: 4px; margin-top: 15px; text-align: center; }
-        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Slot</title>
+
+    <style>
+        /* --- General Reset and Typography --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: #f7f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to the top of the viewport */
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        /* --- Main Container Styling (Design Fix) --- */
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px; /* Limits the width of the form for better readability */
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* --- Form Elements Styling (Design Fix) --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        select {
+            width: 100%; /* Keeps fields responsive within the container */
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* Ensures padding doesn't stretch the field beyond 100% */
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none; /* Removes default OS styling */
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .error {
+            background-color: #ffe0e0;
+            color: #cc0000;
+        }
+
+        .success {
+            background-color: #e0fff0;
+            color: #008000;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Client Flow Appointment Booking</h2> 
-        <form id="bookingForm">
-            <label for="name">Full Name</label>
-            <input type="text" id="name" name="name" required>
 
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" required>
+    <div class="container">
+        <h2>Book a Discovery Slot</h2>
 
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone">
+        <form id="bookingForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" required>
+            </div>
 
-            <label for="date">Select Date</label>
-            <input type="date" id="date" name="date" required>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
 
-            <label>Available Time Slots</label>
-            <div id="timeSlotContainer" class="time-slot-container">
-                </div>
+            <div class="form-group">
+                <label for="date">Select Date</label>
+                <input type="date" id="date" required>
+            </div>
 
-            <input type="hidden" id="time" name="time" data-error-msg="Please select a time slot.">
-            
-            <button type="submit" id="submitBtn" disabled>Book Now</button>
-            <div id="messageArea" class="message" style="display: none;"></div>
-        </form>
-    </div>
+            <div class="form-group">
+                <label for="timeSlot">Available Time Slots</label>
+                <select id="timeSlot" required disabled>
+                    <option value="">-- Select Date First --</option>
+                </select>
+            </div>
 
-    <script>
-        // ***************************************************************
-        // FINAL SECURE URLS - BASE_URL should NOT have a trailing slash
-        // ***************************************************************
-        const BASE_URL = "https://n8n.tidal-growth.com/webhook";  // Corrected: Removed trailing slash
+            <button type="submit" id="submitBtn" disabled>Book Appointment</button>
+        </form>
 
-        // 1. URL for the actual booking submission (REMOVED - Not Built Yet)
-        const BOOKING_WEBHOOK_URL = `${BASE_URL}/suarify-make-booking`;  // This will be .../webhook/suarify-make-booking
+        <div id="status"></div>
+    </div>
 
-        // 2. URL for checking availability slots (ACTIVE - Workflow 2)
-        const CHECKER_WEBHOOK_URL = `${BASE_URL}/check-availability-slots`;  // This will be .../webhook/check-availability-slots
-        
-        // --- Core Elements ---
-        const form = document.getElementById('bookingForm');
-        const messageArea = document.getElementById('messageArea');
-        const submitBtn = document.getElementById('submitBtn');
-        const timeSlotContainer = document.getElementById('timeSlotContainer');
-        const timeInputHidden = document.getElementById('time');
-        const dateInput = document.getElementById('date');
+    <script>
+        // --- CONFIGURATION ---
+        // REPLACE with your actual N8N Webhook URL for the Slot Checker workflow
+        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots";
+        
+        // REPLACE with your actual N8N Webhook URL for the Booking Creator workflow
+        const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; 
+        
+        // --- GLOBAL ELEMENTS ---
+        const dateInput = document.getElementById('date');
+        const timeSlotSelect = document.getElementById('timeSlot');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
+        const form = document.getElementById('bookingForm');
+        
+        // Sets minimum date to today (or tomorrow if you prefer)
+        const today = new Date();
+        today.setDate(today.getDate());
+        dateInput.min = today.toISOString().split('T')[0];
 
-        // Master list of all possible slots
-        const masterSlots = [
-            { display: "9:00 AM", value: "09:00" },
-            { display: "10:00 AM", value: "10:00" },
-            { display: "11:00 AM", value: "11:00" },
-            { display: "2:00 PM", value: "14:00" },
-            { display: "3:00 PM", value: "15:00" },
-            { display: "4:00 PM", value: "16:00" },
-            { display: "5:00 PM", value: "17:00" },
-            { display: "8:00 PM", value: "20:00" },
-        ];
 
-        // --- Core Dynamic Availability Checker ---
+        // ----------------------------------------------------------------------
+        // Step 1: Handle Date Change and Fetch Available Slots
+        // ----------------------------------------------------------------------
+        dateInput.addEventListener('change', async () => {
+            const dateString = dateInput.value;
+            
+            // Reset state
+            timeSlotSelect.innerHTML = '<option value="">Loading...</option>';
+            timeSlotSelect.disabled = true;
+            submitBtn.disabled = true;
+            statusDiv.textContent = '';
+            statusDiv.className = '';
 
-        // Event listener for date change
-        dateInput.addEventListener('change', checkAvailability);
+            if (!dateString) {
+                timeSlotSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+                return;
+            }
 
-        async function checkAvailability() {
-            const selectedDate = dateInput.value;
-            if (!selectedDate) {
-                return;
-            }
-            
-            // Show a loading state
-            timeSlotContainer.innerHTML = '<p style="text-align:center; color:#555;">Checking availability...</p>';
-            submitBtn.disabled = true;
-            timeInputHidden.value = ''; // Clear selected time
+            try {
+                // Send the selected date to the Slot Checker workflow
+                const response = await fetch(SLOT_CHECKER_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dateString: dateString })
+                });
 
-            try {
-                // Send the selected date to the N8N Checker Webhook
-                const response = await fetch(`${CHECKER_WEBHOOK_URL}?date=${selectedDate}`);
-                
-                if (!response.ok) {
-                    // This error now correctly catches failures from N8N or the network
-                    const errorText = await response.text();
-                    console.error('N8N response status:', response.status, errorText);
-                    throw new Error('N8N Checker Webhook returned an error.');
-                }
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
 
-                // Expecting the N8N workflow to return a JSON array of available time values
-                const availableSlotsValues = await response.json(); 
-                
-                // Now render the slots based on the available list
-                renderTimeSlots(availableSlotsValues);
+                // **CRITICAL CHANGE:** Expecting the array to be nested under 'slots'
+                const data = await response.json();
+                const availableSlots = data.slots;
+                
+                // Update the dropdown menu
+                timeSlotSelect.innerHTML = '';
+                if (availableSlots && availableSlots.length > 0) {
+                    availableSlots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot; // Display "HH:mm"
+                        timeSlotSelect.appendChild(option);
+                    });
+                    timeSlotSelect.disabled = false;
+                    submitBtn.disabled = false;
+                } else {
+                    timeSlotSelect.innerHTML = '<option value="">No slots available on this date.</option>';
+                    timeSlotSelect.disabled = true;
+                    submitBtn.disabled = true;
+                }
 
-            } catch (error) {
-                console.error('Availability check failed:', error);
-                timeSlotContainer.innerHTML = '<p style="text-align:center; color:red;">Could not check slots. Check your N8N workflow output or CORS settings.</p>';
-                submitBtn.disabled = true;
-            }
-        }
+            } catch (error) {
+                console.error('Error fetching slots:', error);
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Error fetching slots. Please try a different date.';
+                timeSlotSelect.innerHTML = '<option value="">Error fetching slots</option>';
+                timeSlotSelect.disabled = true;
+            }
+        });
 
-        // --- Function to render and manage the buttons ---
-        function renderTimeSlots(availableTimeValues = []) {
-            timeSlotContainer.innerHTML = ''; // Clear container
-            let anySlotsAvailable = false;
 
-            masterSlots.forEach(slot => {
-                const button = document.createElement('button');
-                button.type = 'button'; 
-                button.textContent = slot.display;
-                button.setAttribute('data-time', slot.value);
-                button.classList.add('time-slot-btn');
-                
-                const isAvailable = availableTimeValues.includes(slot.value);
+        // ----------------------------------------------------------------------
+        // Step 2: Handle Form Submission (Booking Creator)
+        // ----------------------------------------------------------------------
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                date: dateInput.value,
+                timeSlot: timeSlotSelect.value
+            };
 
-                if (isAvailable) {
-                    anySlotsAvailable = true;
-                    button.addEventListener('click', (e) => {
-                        // Deselect all buttons first
-                        document.querySelectorAll('.time-slot-btn').forEach(btn => {
-                            btn.classList.remove('selected');
-                        });
-                        
-                        // Select the clicked button
-                        e.target.classList.add('selected');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Booking...';
+            statusDiv.textContent = 'Processing booking...';
+            statusDiv.className = '';
 
-                        // Save the time value to the hidden input
-                        timeInputHidden.value = slot.value;
-                    });
-                } else {
-                    // Slot is booked or unavailable
-                    button.disabled = true;
-                    button.style.backgroundColor = '#f1f1f1';
-                    button.style.color = '#ccc';
-                    button.style.cursor = 'not-allowed';
-                }
+            try {
+                // Send user data to the Booking Creator workflow
+                const response = await fetch(BOOKING_CREATOR_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
 
-                timeSlotContainer.appendChild(button);
-            });
-            
-            // NOTE: Submit button is permanently disabled because Workflow 1 (Booking) is not built yet.
-            if (anySlotsAvailable) {
-                 submitBtn.disabled = true; 
-                 showMessage('Slots available! The booking button is disabled until the submission workflow is built.', 'message');
-            } else {
-                 timeSlotContainer.innerHTML = '<p style="text-align:center; color:#e06c75; font-weight: bold;">No slots available on this date. Please choose another.</p>';
-                 submitBtn.disabled = true;
-            }
-        }
+                const result = await response.json();
 
-        // --- Helper Functions ---
-        function showMessage(message, type) {
-            messageArea.textContent = message;
-            messageArea.className = `message ${type}`;
-            messageArea.style.display = 'block';
-        }
+                if (response.ok && result.status === 'success') {
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `Success! Your appointment is confirmed for ${userData.timeSlot} on ${userData.date}.`;
+                    form.reset();
+                    timeSlotSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+                    timeSlotSelect.disabled = true;
 
-        // --- Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.setAttribute('min', today);
-            // Initially render a blank slate
-            renderTimeSlots([]); 
-            submitBtn.disabled = true;
-        });
+                } else {
+                    // Handle failure from the N8N workflow (e.g., slot taken, booking error)
+                    throw new Error(result.message || 'Booking failed due to an unknown error.');
+                }
 
-    </script>
+            } catch (error) {
+                console.error('Booking Error:', error);
+                statusDiv.className = 'error';
+                statusDiv.textContent = `Booking failed: ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Book Appointment';
+            }
+        });
+
+    </script>
 </body>
 </html>
