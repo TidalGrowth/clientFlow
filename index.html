@@ -178,177 +178,183 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots";
-        const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; // Placeholder
+    // --- CONFIGURATION ---
+    const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots";
+    const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; // Placeholder
+    
+    // --- GLOBAL ELEMENTS ---
+    const dateInput = document.getElementById('date');
+    const slotContainer = document.getElementById('slot-container');
+    const selectedTimeSlot = document.getElementById('selectedTimeSlot');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
+    const form = document.getElementById('bookingForm');
+    
+    // --- HELPER FUNCTIONS ---
+    // Function to format the YYYY-MM-DD date (from the input) to DD/MM/YYYY for display
+    function formatDisplayDate(isoDateString) {
+        if (!isoDateString) return '';
+        const [year, month, day] = isoDateString.split('-');
+        return `${day}/${month}/${year}`;
+    }
+
+    // --- INITIALIZATION ---
+    const today = new Date();
+    
+    // Set minimum date to today (YYYY-MM-DD format required by HTML date input)
+    const todayISO = today.toISOString().split('T')[0];
+    dateInput.min = todayISO;
+    
+    // CRITICAL FIX FOR INITIAL LOAD: Set the initial value of the date input to today's date.
+    // This forces the calendar to display today's date on load.
+    dateInput.value = todayISO;
+    
+    // Run availability check immediately on load, as the date input is now initialized.
+    document.addEventListener('DOMContentLoaded', () => {
+        checkAvailability();
+    });
+    
+    // --- EVENT LISTENERS ---
+    dateInput.addEventListener('change', checkAvailability);
+    form.addEventListener('submit', handleFormSubmission);
+
+
+    // ----------------------------------------------------------------------
+    // Step 1: Handle Date Change and Fetch Available Slots
+    // ----------------------------------------------------------------------
+    async function checkAvailability() {
+        // dateInput.value is always YYYY-MM-DD, which n8n expects.
+        const dateString = dateInput.value; 
         
-        // --- GLOBAL ELEMENTS ---
-        const dateInput = document.getElementById('date');
-        const slotContainer = document.getElementById('slot-container');
-        const selectedTimeSlot = document.getElementById('selectedTimeSlot');
-        const submitBtn = document.getElementById('submitBtn');
-        const statusDiv = document.getElementById('status');
-        const form = document.getElementById('bookingForm');
-        
-        // --- HELPER FUNCTIONS ---
-        // Function to format the YYYY-MM-DD date (from the input) to DD/MM/YYYY for display
-        function formatDisplayDate(isoDateString) {
-            if (!isoDateString) return '';
-            const [year, month, day] = isoDateString.split('-');
-            return `${day}/${month}/${year}`;
+        // Reset state
+        slotContainer.innerHTML = '<p style="color:#888; margin:0;">Loading...</p>';
+        selectedTimeSlot.value = ''; // Clear selected time
+        submitBtn.disabled = true;
+        statusDiv.textContent = '';
+        statusDiv.className = '';
+
+        if (!dateString) {
+            slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
+            return;
         }
 
-        // --- INITIALIZATION ---
-        const today = new Date();
-        
-        // Set minimum date to today (YYYY-MM-DD format required by HTML date input)
-        const todayISO = today.toISOString().split('T')[0];
-        dateInput.min = todayISO;
-        
-        // CRITICAL FIX: Set the initial value of the date input to today's date
-        // This makes the input active and initialized on load.
-        dateInput.value = todayISO;
-        
-        // --- EVENT LISTENERS ---
-        dateInput.addEventListener('change', checkAvailability);
-        form.addEventListener('submit', handleFormSubmission);
-
-
-        // ----------------------------------------------------------------------
-        // Step 1: Handle Date Change and Fetch Available Slots
-        // ----------------------------------------------------------------------
-        async function checkAvailability() {
-            const dateString = dateInput.value; // YYYY-MM-DD
-            
-            // Reset state
-            slotContainer.innerHTML = '<p style="color:#888; margin:0;">Loading...</p>';
-            selectedTimeSlot.value = ''; // Clear selected time
-            submitBtn.disabled = true;
-            statusDiv.textContent = '';
-            statusDiv.className = '';
-
-            if (!dateString) {
-                slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
-                return;
-            }
-
-            try {
-                const response = await fetch(SLOT_CHECKER_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dateString: dateString })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const availableSlots = Array.isArray(data) ? data : data.slots;
-                
-                // Renders buttons instead of options
-                renderSlotButtons(availableSlots);
-                
-            } catch (error) {
-                console.error('Error fetching slots:', error);
-                statusDiv.className = 'error';
-                statusDiv.textContent = 'Error fetching slots. Please check the date and try again.';
-                slotContainer.innerHTML = '<p class="error" style="margin:0;">Error fetching slots</p>';
-                submitBtn.disabled = true;
-            }
-        }
-        
-        // ----------------------------------------------------------------------
-        // Step 2: Function to Render Slots as Buttons (No change here)
-        // ----------------------------------------------------------------------
-        function renderSlotButtons(slots) {
-            slotContainer.innerHTML = '';
-            
-            if (!slots || slots.length === 0) {
-                slotContainer.innerHTML = '<p style="color:#888; margin:0;">No slots available on this date.</p>';
-                return;
-            }
-
-            slots.forEach(slotTime => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'slot-button';
-                button.textContent = slotTime;
-                button.setAttribute('data-time', slotTime);
-
-                button.addEventListener('click', function() {
-                    document.querySelectorAll('.slot-button').forEach(btn => {
-                        btn.classList.remove('selected');
-                    });
-                    
-                    this.classList.add('selected');
-                    selectedTimeSlot.value = slotTime; 
-                    submitBtn.disabled = false;
-                });
-
-                slotContainer.appendChild(button);
+        try {
+            const response = await fetch(SLOT_CHECKER_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Sending YYYY-MM-DD format
+                body: JSON.stringify({ dateString: dateString })
             });
-        }
 
-
-        // ----------------------------------------------------------------------
-        // Step 3: Handle Form Submission (Booking Creator) - Formatting Fix
-        // ----------------------------------------------------------------------
-        async function handleFormSubmission(e) {
-            e.preventDefault();
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
             
-            if (!selectedTimeSlot.value) {
-                statusDiv.className = 'error';
-                statusDiv.textContent = 'Please select an available time slot.';
-                return;
-            }
-
-            const userData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                date: dateInput.value, // YYYY-MM-DD
-                timeSlot: selectedTimeSlot.value
-            };
-
+            const data = await response.json();
+            const availableSlots = Array.isArray(data) ? data : data.slots;
+            
+            renderSlotButtons(availableSlots);
+            
+        } catch (error) {
+            console.error('Error fetching slots:', error);
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Error fetching slots. Please check the date and try again.';
+            slotContainer.innerHTML = '<p class="error" style="margin:0;">Error fetching slots</p>';
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Booking...';
-            statusDiv.textContent = 'Processing booking...';
-            statusDiv.className = '';
-
-            try {
-                const response = await fetch(BOOKING_CREATOR_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData)
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.status === 'success') {
-                    // CRITICAL FIX: Format the date for the success message display
-                    const displayDate = formatDisplayDate(userData.date);
-                    
-                    statusDiv.className = 'success';
-                    statusDiv.textContent = `Success! Your appointment is confirmed for ${userData.timeSlot} on ${displayDate}.`;
-                    form.reset();
-                    slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
-                    selectedTimeSlot.value = '';
-
-                } else {
-                    throw new Error(result.message || 'Booking failed due to an unknown error.');
-                }
-
-            } catch (error) {
-                console.error('Booking Error:', error);
-                statusDiv.className = 'error';
-                statusDiv.textContent = `Booking failed: The booking creator workflow is not yet active.`;
-            } finally {
-                if(selectedTimeSlot.value) {
-                    submitBtn.disabled = false;
-                }
-                submitBtn.textContent = 'Book Appointment';
-            }
         }
-    </script>
+    }
+    
+    // ----------------------------------------------------------------------
+    // Step 2: Function to Render Slots as Buttons
+    // ----------------------------------------------------------------------
+    function renderSlotButtons(slots) {
+        slotContainer.innerHTML = '';
+        
+        if (!slots || slots.length === 0) {
+            slotContainer.innerHTML = '<p style="color:#888; margin:0;">No slots available on this date.</p>';
+            return;
+        }
+
+        slots.forEach(slotTime => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'slot-button';
+            button.textContent = slotTime;
+            button.setAttribute('data-time', slotTime);
+
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.slot-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                this.classList.add('selected');
+                selectedTimeSlot.value = slotTime; 
+                submitBtn.disabled = false;
+            });
+
+            slotContainer.appendChild(button);
+        });
+    }
+
+
+    // ----------------------------------------------------------------------
+    // Step 3: Handle Form Submission (Booking Creator) - Formatting Fix
+    // ----------------------------------------------------------------------
+    async function handleFormSubmission(e) {
+        e.preventDefault();
+        
+        if (!selectedTimeSlot.value) {
+            statusDiv.className = 'error';
+            statusDiv.textContent = 'Please select an available time slot.';
+            return;
+        }
+
+        const userData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            date: dateInput.value, // YYYY-MM-DD
+            timeSlot: selectedTimeSlot.value
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Booking...';
+        statusDiv.textContent = 'Processing booking...';
+        statusDiv.className = '';
+
+        try {
+            const response = await fetch(BOOKING_CREATOR_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+                // CRITICAL FIX: Format the date for the success message display
+                const displayDate = formatDisplayDate(userData.date);
+                
+                statusDiv.className = 'success';
+                statusDiv.textContent = `Success! Your appointment is confirmed for ${userData.timeSlot} on ${displayDate}.`;
+                form.reset();
+                slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
+                selectedTimeSlot.value = '';
+
+            } else {
+                throw new Error(result.message || 'Booking failed due to an unknown error.');
+            }
+
+        } catch (error) {
+            console.error('Booking Error:', error);
+            statusDiv.className = 'error';
+            statusDiv.textContent = `Booking failed: The booking creator workflow is not yet active.`;
+        } finally {
+            if(selectedTimeSlot.value) {
+                submitBtn.disabled = false;
+            }
+            submitBtn.textContent = 'Book Appointment';
+        }
+    }
+</script>
 </body>
 </html>
