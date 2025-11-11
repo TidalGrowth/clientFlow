@@ -183,7 +183,12 @@
     const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; // Placeholder
     
     // --- GLOBAL ELEMENTS ---
-    const dateInput = document.getElementById('date');
+    // The HIDDEN input holds the value N8N uses
+    const dateInputAPI = document.getElementById('date');
+    // The TEXT input is what the user SEES
+    const dateInputDisplay = document.getElementById('dateDisplay');
+    const openDatePickerBtn = document.getElementById('openDatePickerBtn');
+
     const slotContainer = document.getElementById('slot-container');
     const selectedTimeSlot = document.getElementById('selectedTimeSlot');
     const submitBtn = document.getElementById('submitBtn');
@@ -191,40 +196,67 @@
     const form = document.getElementById('bookingForm');
     
     // --- HELPER FUNCTIONS ---
-    // Function to format the YYYY-MM-DD date (from the input) to DD/MM/YYYY for display
+    // Converts YYYY-MM-DD (API) to DD/MM/YYYY (DISPLAY)
     function formatDisplayDate(isoDateString) {
         if (!isoDateString) return '';
         const [year, month, day] = isoDateString.split('-');
         return `${day}/${month}/${year}`;
     }
 
+    // Converts a Date object to YYYY-MM-DD
+    function formatISODate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // --- INITIALIZATION ---
     const today = new Date();
+    const todayISO = formatISODate(today);
     
-    // Set minimum date to today (YYYY-MM-DD format required by HTML date input)
-    const todayISO = today.toISOString().split('T')[0];
-    dateInput.min = todayISO;
+    // 1. Initialize the hidden API value to today's date (YYYY-MM-DD)
+    dateInputAPI.value = todayISO;
     
-    // CRITICAL FIX FOR INITIAL LOAD: Set the initial value of the date input to today's date.
-    // This forces the calendar to display today's date on load.
-    dateInput.value = todayISO;
+    // 2. Initialize the display value to today's date in DD/MM/YYYY format
+    dateInputDisplay.value = formatDisplayDate(todayISO);
     
-    // Run availability check immediately on load, as the date input is now initialized.
+    // Create a temporary hidden date input to manage date selection logic (HACK)
+    const tempDateInput = document.createElement('input');
+    tempDateInput.type = 'date';
+    tempDateInput.style.display = 'none'; // Keep it hidden
+    tempDateInput.min = todayISO; // Set min date
+    document.body.appendChild(tempDateInput); 
+
+    // --- EVENT LISTENERS ---
+    
+    // CRITICAL: Button opens the temporary date picker
+    openDatePickerBtn.addEventListener('click', () => {
+        tempDateInput.click();
+    });
+
+    // When the temporary date picker changes, update both fields and check slots
+    tempDateInput.addEventListener('change', () => {
+        const selectedISO = tempDateInput.value; // YYYY-MM-DD
+        
+        dateInputAPI.value = selectedISO; // Update hidden field
+        dateInputDisplay.value = formatDisplayDate(selectedISO); // Update display field
+        
+        checkAvailability(); // Check slots for the newly selected date
+    });
+
+    form.addEventListener('submit', handleFormSubmission);
+    
     document.addEventListener('DOMContentLoaded', () => {
+        // Run availability check immediately on load
         checkAvailability();
     });
-    
-    // --- EVENT LISTENERS ---
-    dateInput.addEventListener('change', checkAvailability);
-    form.addEventListener('submit', handleFormSubmission);
-
 
     // ----------------------------------------------------------------------
     // Step 1: Handle Date Change and Fetch Available Slots
     // ----------------------------------------------------------------------
     async function checkAvailability() {
-        // dateInput.value is always YYYY-MM-DD, which n8n expects.
-        const dateString = dateInput.value; 
+        const dateString = dateInputAPI.value; // YYYY-MM-DD
         
         // Reset state
         slotContainer.innerHTML = '<p style="color:#888; margin:0;">Loading...</p>';
@@ -242,7 +274,6 @@
             const response = await fetch(SLOT_CHECKER_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // Sending YYYY-MM-DD format
                 body: JSON.stringify({ dateString: dateString })
             });
 
@@ -265,7 +296,7 @@
     }
     
     // ----------------------------------------------------------------------
-    // Step 2: Function to Render Slots as Buttons
+    // Step 2: Function to Render Slots as Buttons (No change here)
     // ----------------------------------------------------------------------
     function renderSlotButtons(slots) {
         slotContainer.innerHTML = '';
@@ -298,7 +329,7 @@
 
 
     // ----------------------------------------------------------------------
-    // Step 3: Handle Form Submission (Booking Creator) - Formatting Fix
+    // Step 3: Handle Form Submission (Booking Creator)
     // ----------------------------------------------------------------------
     async function handleFormSubmission(e) {
         e.preventDefault();
@@ -312,7 +343,7 @@
         const userData = {
             name: document.getElementById('name').value,
             email: document.getElementById('email').value,
-            date: dateInput.value, // YYYY-MM-DD
+            date: dateInputAPI.value, // YYYY-MM-DD
             timeSlot: selectedTimeSlot.value
         };
 
@@ -331,7 +362,7 @@
             const result = await response.json();
 
             if (response.ok && result.status === 'success') {
-                // CRITICAL FIX: Format the date for the success message display
+                // FIX: Format the date for the success message display
                 const displayDate = formatDisplayDate(userData.date);
                 
                 statusDiv.className = 'success';
@@ -355,6 +386,6 @@
             submitBtn.textContent = 'Book Appointment';
         }
     }
-</script>
+    </script>
 </body>
 </html>
