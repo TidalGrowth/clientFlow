@@ -242,6 +242,10 @@
         dateInputAPI.value = selectedISO; // Update hidden field
         dateInputDisplay.value = formatDisplayDate(selectedISO); // Update display field
         
+        // --- UI FIX: Force the date picker to close ---
+        tempDateInput.blur(); 
+        // ---------------------------------------------
+
         checkAvailability(); // Check slots for the newly selected date
     });
 
