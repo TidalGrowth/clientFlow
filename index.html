@@ -49,7 +49,8 @@
 
         input[type="text"],
         input[type="email"],
-        input[type="date"] {
+        input[type="date"],
+        select { /* Added select */
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -62,7 +63,8 @@
             appearance: none;
         }
 
-        input:focus {
+        input:focus,
+        select:focus { /* Added select */
             border-color: #007bff;
             outline: none;
         }
@@ -157,6 +159,25 @@
                 <label for="email">Email</label>
                 <input type="email" id="email" required>
             </div>
+            
+            <div class="form-group">
+                <label for="service">Select Service & Duration</label>
+                <select id="service" required>
+                    <option value="" disabled selected>-- Select a Service --</option>
+                    <option value="30">Discovery Call (30 mins)</option>
+                    <option value="60">Deep Dive Strategy (60 mins)</option>
+                    <option value="90">Full Planning Session (90 mins)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="worker">Select Specialist</label>
+                <select id="worker" required>
+                    <option value="" disabled selected>-- Select a Specialist --</option>
+                    <option value="c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com">Specialist A (Alex)</option>
+                    <option value="c_fe27362b4a113006914e848ceba9d7758c4d4dc1f55d67e7084dc90355e5b499@group.calendar.google.com">Specialist B (Beth)</option>
+                </select>
+            </div>
 
             <div class="form-group">
                 <label for="date">Select Date</label>
@@ -166,7 +187,7 @@
             <div class="form-group">
                 <label>Available Time Slots</label>
                 <div id="slot-container">
-                    <p style="color:#888; margin:0;">-- Select Date First --</p>
+                    <p style="color:#888; margin:0;">-- Select Service, Specialist, and Date --</p>
                 </div>
                 <input type="hidden" id="selectedTimeSlot" required>
             </div>
@@ -179,13 +200,18 @@
 
     <script>
         // --- CONFIGURATION ---
-        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots";
-        const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; // Placeholder
+        // NOTE: Replace this with your actual n8n Webhook URL for checking slots.
+        const SLOT_CHECKER_WEBHOOK = "https://n8n.tidal-growth.com/webhook/check-availability-slots"; 
+        
+        // NOTE: Replace this with your actual n8n Webhook URL for creating the booking.
+        const BOOKING_CREATOR_WEBHOOK = "YOUR_BOOKING_CREATOR_WEBHOOK_URL"; 
         
         // --- GLOBAL ELEMENTS ---
+        const serviceInput = document.getElementById('service');
+        const workerInput = document.getElementById('worker');
         const dateInput = document.getElementById('date');
-        const slotContainer = document.getElementById('slot-container'); // NEW
-        const selectedTimeSlot = document.getElementById('selectedTimeSlot'); // NEW hidden input
+        const slotContainer = document.getElementById('slot-container');
+        const selectedTimeSlot = document.getElementById('selectedTimeSlot');
         const submitBtn = document.getElementById('submitBtn');
         const statusDiv = document.getElementById('status');
         const form = document.getElementById('bookingForm');
@@ -196,15 +222,20 @@
         dateInput.min = today.toISOString().split('T')[0];
         
         // --- EVENT LISTENERS ---
+        // Check availability whenever Service, Specialist, or Date changes
+        serviceInput.addEventListener('change', checkAvailability); 
+        workerInput.addEventListener('change', checkAvailability); 
         dateInput.addEventListener('change', checkAvailability);
         form.addEventListener('submit', handleFormSubmission);
 
 
         // ----------------------------------------------------------------------
-        // Step 1: Handle Date Change and Fetch Available Slots
+        // Step 1: Handle Input Change and Fetch Available Slots
         // ----------------------------------------------------------------------
         async function checkAvailability() {
             const dateString = dateInput.value;
+            const workerId = workerInput.value; 
+            const duration = serviceInput.value; 
             
             // Reset state
             slotContainer.innerHTML = '<p style="color:#888; margin:0;">Loading...</p>';
@@ -213,8 +244,9 @@
             statusDiv.textContent = '';
             statusDiv.className = '';
 
-            if (!dateString) {
-                slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
+            // Require all three inputs to proceed
+            if (!dateString || !workerId || !duration) {
+                slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Service, Specialist, and Date --</p>';
                 return;
             }
 
@@ -222,49 +254,53 @@
                 const response = await fetch(SLOT_CHECKER_WEBHOOK, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dateString: dateString })
+                    body: JSON.stringify({ 
+                        dateString: dateString,
+                        workerId: workerId, // Pass the Specialist's calendar ID
+                        duration: duration // Pass the required slot length in minutes
+                    })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP Error: ${response.status}`);
+                    // Attempt to read error message from response body if available
+                    let errorBody = await response.text();
+                    try {
+                        errorBody = JSON.parse(errorBody).message || errorBody;
+                    } catch {
+                        // Not a JSON body, use raw text
+                    }
+                    throw new Error(`HTTP Error ${response.status}: ${errorBody}`);
                 }
                 
                 const data = await response.json();
+                // Handle both array response (n8n default) and object response {slots: []}
                 const availableSlots = Array.isArray(data) ? data : data.slots;
                 
-                // NEW FUNCTION: Renders buttons instead of options
                 renderSlotButtons(availableSlots);
                 
-                // Only enable submit if slots are available
-                if (availableSlots && availableSlots.length > 0) {
-                    // Do not enable submit yet, wait for a slot to be selected
-                } else {
-                    submitBtn.disabled = true;
-                }
-
             } catch (error) {
                 console.error('Error fetching slots:', error);
                 statusDiv.className = 'error';
-                statusDiv.textContent = 'Error fetching slots. Please check the date and try again.';
+                statusDiv.textContent = 'Error fetching slots. Please ensure the Specialist ID and Webhook are correct.';
                 slotContainer.innerHTML = '<p class="error" style="margin:0;">Error fetching slots</p>';
                 submitBtn.disabled = true;
             }
         }
         
         // ----------------------------------------------------------------------
-        // Step 2: NEW Function to Render Slots as Buttons
+        // Step 2: Function to Render Slots as Buttons
         // ----------------------------------------------------------------------
         function renderSlotButtons(slots) {
             slotContainer.innerHTML = '';
             
             if (!slots || slots.length === 0) {
-                slotContainer.innerHTML = '<p style="color:#888; margin:0;">No slots available on this date.</p>';
+                slotContainer.innerHTML = '<p style="color:#888; margin:0;">No slots available on this date that fit the selected duration.</p>';
                 return;
             }
 
             slots.forEach(slotTime => {
                 const button = document.createElement('button');
-                button.type = 'button'; // Important: prevents form submission
+                button.type = 'button';
                 button.className = 'slot-button';
                 button.textContent = slotTime;
                 button.setAttribute('data-time', slotTime);
@@ -275,14 +311,13 @@
                         btn.classList.remove('selected');
                     });
                     
-                    // Select the clicked button
                     this.classList.add('selected');
                     
-                    // Store the selected time in the hidden input for form submission
                     selectedTimeSlot.value = slotTime; 
                     
-                    // Enable the main submit button
                     submitBtn.disabled = false;
+                    statusDiv.textContent = ''; // Clear status once a slot is selected
+                    statusDiv.className = '';
                 });
 
                 slotContainer.appendChild(button);
@@ -296,7 +331,6 @@
         async function handleFormSubmission(e) {
             e.preventDefault();
             
-            // Check if a slot was actually selected
             if (!selectedTimeSlot.value) {
                 statusDiv.className = 'error';
                 statusDiv.textContent = 'Please select an available time slot.';
@@ -307,7 +341,9 @@
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
                 date: dateInput.value,
-                timeSlot: selectedTimeSlot.value // Use the value from the hidden input
+                timeSlot: selectedTimeSlot.value,
+                serviceDuration: serviceInput.value, 
+                specialistId: workerInput.value // The Calendar ID
             };
 
             submitBtn.disabled = true;
@@ -315,7 +351,7 @@
             statusDiv.textContent = 'Processing booking...';
             statusDiv.className = '';
 
-            // Note: This submission will fail until the BOOKING_CREATOR_WEBHOOK is built.
+            // This submission will fail until the BOOKING_CREATOR_WEBHOOK is built.
             try {
                 const response = await fetch(BOOKING_CREATOR_WEBHOOK, {
                     method: 'POST',
@@ -327,10 +363,9 @@
 
                 if (response.ok && result.status === 'success') {
                     statusDiv.className = 'success';
-                    statusDiv.textContent = `Success! Your appointment is confirmed for ${userData.timeSlot} on ${userData.date}.`;
+                    statusDiv.textContent = `Success! Your appointment is confirmed for ${userData.timeSlot} on ${userData.date} with Specialist ${userData.specialistId}.`;
                     form.reset();
-                    // Reset slot container and hidden input
-                    slotContainer.innerHTML = '<p style="color:#888; margin:0;">-- Select Date First --</p>';
+                    slotContainer.innerHTML = '<p style="color:#888; margin:0;">Booking confirmed. Thank you.</p>';
                     selectedTimeSlot.value = '';
 
                 } else {
@@ -340,9 +375,9 @@
             } catch (error) {
                 console.error('Booking Error:', error);
                 statusDiv.className = 'error';
-                statusDiv.textContent = `Booking failed: The booking creator workflow is not yet active.`;
+                statusDiv.textContent = `Booking failed: The booking creator workflow is not yet active. (Details: ${error.message})`;
             } finally {
-                // Only re-enable the button if an input is still selected
+                // Re-enable button if no slot was successfully booked and we are still on the form
                 if(selectedTimeSlot.value) {
                     submitBtn.disabled = false;
                 }
