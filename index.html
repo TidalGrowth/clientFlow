@@ -3,23 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale-1.0">
-    <title id="lang-title-tag">Book a Slot</title>
+    <title id="lang-title-tag"></title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f7f9fc;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column; /* Changed to column for banner */
+            justify-content: flex-start;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 40px 20px;
             box-sizing: border-box;
         }
+        
+        /* --- NEW: Logo Banner Styling --- */
+        #banner {
+            width: 100%;
+            max-width: 450px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: -1px; /* Overlap with container border */
+            text-align: center;
+        }
+        #banner img {
+            max-width: 100%;
+            max-height: 60px; /* Max height for the logo */
+            display: block;
+            margin: 0 auto;
+        }
+
         .container {
             background-color: #ffffff;
             padding: 30px;
             border-radius: 12px;
+            /* Adjust border radius if banner is present */
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 450px;
@@ -39,9 +63,16 @@
             color: #555;
             font-weight: 500;
         }
+        /* --- NEW: Asterisk Styling --- */
+        label.required::after {
+            content: " *";
+            color: red;
+            font-weight: bold;
+        }
+        
         input[type="text"],
         input[type="email"],
-        input[type="tel"], /* Added for custom fields */
+        input[type="tel"],
         input[type="date"] {
             width: 100%;
             padding: 12px;
@@ -90,7 +121,6 @@
             margin-top: 10px;
         }
         
-        /* NEW: Price Display */
         #price-display {
             text-align: right;
             font-size: 1.1em;
@@ -127,17 +157,21 @@
     </style>
 </head>
 <body>
+    
+    <div id="banner" class="hidden">
+        <img id="client-logo" alt="Client Logo">
+    </div>
 
     <div class="container">
         <h2 id="lang-title"></h2>
 
         <form id="bookingForm">
             <div class="form-group">
-                <label for="name" id="lang-name"></label>
+                <label for="name" id="lang-name" class="required"></label>
                 <input type="text" id="name" required>
             </div>
             <div class="form-group">
-                <label for="email" id="lang-email"></label>
+                <label for="email" id="lang-email" class="required"></label>
                 <input type="email" id="email" required>
             </div>
             
@@ -145,20 +179,20 @@
                 </div>
 
             <div class="form-group" id="service-module">
-                <label id="lang-service"></label>
+                <label id="lang-service" class="required"></label>
                 <div id="service-container" class="selection-grid">
                     </div>
                 <div id="price-display" class="hidden"></div>
             </div>
 
             <div class="form-group hidden" id="specialist-module">
-                <label id="lang-specialist"></label>
+                <label id="lang-specialist" class="required"></label>
                 <div id="specialist-container" class="selection-grid">
                     </div>
             </div>
 
             <div class="form-group">
-                <label for="date" id="lang-date"></label>
+                <label for="date" id="lang-date" class="required"></label>
                 <input type="date" id="date" required>
             </div>
             
@@ -183,10 +217,12 @@
         // ======================================================================
         // --- 1. MODULAR CONFIGURATION OBJECT ---
         // ======================================================================
-        // To configure for a new client, you ONLY edit this object.
         const CONFIG = {
             // --- Language Toggle ('en', 'de', 'sl') ---
-            language: 'en',
+            language: 'sl',
+
+            // --- Branding ---
+            logoUrl: 'https://placehold.co/400x100/A0C4FF/007BFF/svg?text=Client+Logo+Here', // Set the client's logo URL here. Empty string '' to hide banner.
 
             // --- Webhook URLs (Client-Specific) ---
             SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability-slots",
@@ -194,69 +230,19 @@
             
             // --- Feature Toggles ---
             features: {
-                // bufferTime: 15, // This is a BACKEND (n8n) setting, not frontend
                 showPrice: true,
-                // findNextSlots: true // We will implement this next
             },
 
             // --- Text & Translation Strings ---
             strings: {
                 en: {
-                    title: "Book a Slot",
-                    name: "Name",
-                    email: "Email",
-                    service: "Select Service",
-                    specialist: "Select Specialist",
-                    date: "Select Date",
-                    slots: "Available Time Slots",
-                    slotsPlaceholder: "-- Select service and date --",
-                    submit: "Book Appointment",
-                    pricePrefix: "Total: ",
-                    priceSuffix: " €", // Example currency
-                    statusLoading: "Loading...",
-                    statusNoSlots: "No slots available for this service and date.",
-                    statusError: "Error fetching slots. Please try again.",
-                    statusBooking: "Booking...",
-                    statusSuccess: "Success! Appointment confirmed.",
-                    statusFailed: "Booking failed: ",
+                    title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "-- Select service and date --", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available for this service and date.", statusError: "Error fetching slots. Please try again.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
                 },
                 de: {
-                    title: "Termin buchen",
-                    name: "Name",
-                    email: "E-Mail",
-                    service: "Dienstleistung wählen",
-                    specialist: "Spezialist wählen",
-                    date: "Datum wählen",
-                    slots: "Verfügbare Termine",
-                    slotsPlaceholder: "-- Dienstleistung und Datum wählen --",
-                    submit: "Termin buchen",
-                    pricePrefix: "Gesamt: ",
-                    priceSuffix: " €",
-                    statusLoading: "Wird geladen...",
-                    statusNoSlots: "Keine Termine für diesen Tag/Dienst verfügbar.",
-                    statusError: "Fehler beim Abrufen von Terminen. Bitte erneut versuchen.",
-                    statusBooking: "Termin wird gebucht...",
-                    statusSuccess: "Erfolg! Termin bestätigt.",
-                    statusFailed: "Buchung fehlgeschlagen: ",
+                    title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung wählen", specialist: "Spezialist wählen", date: "Datum wählen", slots: "Verfügbare Termine", slotsPlaceholder: "-- Dienstleistung und Datum wählen --", submit: "Termin buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine für diesen Tag/Dienst verfügbar.", statusError: "Fehler beim Abrufen von Terminen. Bitte erneut versuchen.", statusBooking: "Termin wird gebucht...", statusSuccess: "Erfolg! Termin bestätigt.", statusFailed: "Buchung fehlgeschlagen: ",
                 },
                 sl: {
-                    title: "Rezervirajte termin",
-                    name: "Ime in Priimek",
-                    email: "E-pošta",
-                    service: "Izberite storitev",
-                    specialist: "Izberite specialista",
-                    date: "Izberite datum",
-                    slots: "Prosti termini",
-                    slotsPlaceholder: "-- Izberite storitev in datum --",
-                    submit: "Rezerviraj termin",
-                    pricePrefix: "Skupaj: ",
-                    priceSuffix: " €",
-                    statusLoading: "Nalaganje...",
-                    statusNoSlots: "Na voljo ni prostih terminov za izbrano storitev/datum.",
-                    statusError: "Napaka pri pridobivanju terminov. Poskusite znova.",
-                    statusBooking: "Rezerviram...",
-                    statusSuccess: "Uspešno! Termin je potrjen.",
-                    statusFailed: "Rezervacija ni uspela: ",
+                    title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Izberite storitev", specialist: "Izberite specialista", date: "Izberite datum", slots: "Prosti termini", slotsPlaceholder: "-- Izberite storitev in datum --", submit: "Rezerviraj termin", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Na voljo ni prostih terminov za izbrano storitev/datum.", statusError: "Napaka pri pridobivanju terminov. Poskusite znova.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno! Termin je potrjen.", statusFailed: "Rezervacija ni uspela: ",
                 }
             },
 
@@ -268,16 +254,13 @@
             ],
 
             // --- Specialist Configuration (Modular Toggle) ---
-            // If this list is empty, the Specialist section will NOT render.
             specialists: [
-                { name: "Specialist A", id: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com" },
-                { name: "Specialist B", id: "c_fe27362b4a113006914e848ceba9d7758c4d4dc1f55d67e7084dc90355e5b499@group.calendar.google.com" }
+                { name: "Specialist A", id: "c_WorkerACalendarID@group.calendar.google.com" },
+                { name: "Specialist B", id: "c_WorkerBCalendarID@group.calendar.google.com" }
             ],
-            // If specialists list is empty, set a default Calendar ID for solo providers
-            defaultSpecialistId: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com",
+            defaultSpecialistId: "c_SOLO_PROVIDER_CALENDAR_ID@group.calendar.google.com",
             
             // --- Custom Fields Configuration (Modular Toggle) ---
-            // If this list is empty, no extra fields will render.
             customFields: [
                 { id: "phone", type: "tel", required: true, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
                 { id: "goal", type: "text", required: false, labels: { en: "Primary Goal (Optional)", de: "Hauptziel (Optional)", sl: "Glavni cilj (Opcijsko)" } }
@@ -286,7 +269,7 @@
         // ======================================================================
 
         // --- 2. GLOBAL ELEMENTS ---
-        const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en']; // Get language strings
+        const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
         const customFieldsContainer = document.getElementById('custom-fields-container');
         const serviceContainer = document.getElementById('service-container');
         const specialistContainer = document.getElementById('specialist-container');
@@ -297,6 +280,8 @@
         const submitBtn = document.getElementById('lang-submit');
         const statusDiv = document.getElementById('status');
         const form = document.getElementById('bookingForm');
+        const bannerDiv = document.getElementById('banner');
+        const clientLogoImg = document.getElementById('client-logo');
         
         const selectedServiceDuration = document.getElementById('selectedServiceDuration');
         const selectedSpecialistId = document.getElementById('selectedSpecialistId');
@@ -304,31 +289,48 @@
         
         // --- 3. INITIALIZATION (On Page Load) ---
         document.addEventListener('DOMContentLoaded', () => {
+            applyBranding(); // Run branding first
             applyLanguage();
             renderCustomFields();
             renderServices();
             renderSpecialists();
             
-            // Set minimum date to today
             const today = new Date();
             today.setDate(today.getDate());
             dateInput.min = today.toISOString().split('T')[0];
 
-            // Add event listeners
             dateInput.addEventListener('change', checkAvailability);
             form.addEventListener('submit', handleFormSubmission);
         });
-
+        
         // --- 4. MODULAR RENDER FUNCTIONS ---
+        
+        function applyBranding() {
+            if (CONFIG.logoUrl) {
+                clientLogoImg.src = CONFIG.logoUrl;
+                bannerDiv.classList.remove('hidden');
+                // Adjust container styling if the banner is shown
+                document.querySelector('.container').style.boxShadow = '0 8px 12px rgba(0, 0, 0, 0.05)';
+            } else {
+                // If no logo, ensure the container has rounded top corners
+                document.querySelector('.container').style.borderTopLeftRadius = '12px';
+                document.querySelector('.container').style.borderTopRightRadius = '12px';
+                document.querySelector('.container').style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.05)';
+            }
+        }
 
         function applyLanguage() {
             document.getElementById('lang-title-tag').textContent = lang.title;
             document.getElementById('lang-title').textContent = lang.title;
+            
+            // Required labels
             document.getElementById('lang-name').textContent = lang.name;
             document.getElementById('lang-email').textContent = lang.email;
             document.getElementById('lang-service').textContent = lang.service;
             document.getElementById('lang-specialist').textContent = lang.specialist;
             document.getElementById('lang-date').textContent = lang.date;
+            
+            // Other labels
             document.getElementById('lang-slots').textContent = lang.slots;
             document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
             submitBtn.textContent = lang.submit;
@@ -341,7 +343,10 @@
                 
                 const label = document.createElement('label');
                 label.htmlFor = field.id;
-                label.textContent = field.labels[CONFIG.language]; // Use translated label
+                label.textContent = field.labels[CONFIG.language];
+                if (field.required) {
+                    label.classList.add('required');
+                }
                 
                 const input = document.createElement('input');
                 input.type = field.type;
@@ -381,6 +386,7 @@
         function renderSpecialists() {
             if (CONFIG.specialists.length === 0) {
                 selectedSpecialistId.value = CONFIG.defaultSpecialistId;
+                specialistModule.classList.add('hidden');
                 return;
             }
             specialistModule.classList.remove('hidden');
@@ -397,9 +403,9 @@
                 specialistContainer.appendChild(button);
             });
         }
-
-        // --- 5. DYNAMIC AVAILABILITY CHECK ---
-
+        
+        // --- 5. DYNAMIC AVAILABILITY CHECK & FORM SUBMISSION (Same as previous, omitted for brevity but present in actual file) ---
+        
         async function checkAvailability() {
             const dateString = dateInput.value;
             const workerId = selectedSpecialistId.value;
@@ -456,8 +462,6 @@
             });
         }
 
-        // --- 6. FORM SUBMISSION ---
-
         async function handleFormSubmission(e) {
             e.preventDefault();
             
@@ -468,10 +472,9 @@
                 timeSlot: selectedTimeSlot.value,
                 serviceDuration: selectedServiceDuration.value,
                 specialistId: selectedSpecialistId.value,
-                customData: {} // Prepare to send custom fields
+                customData: {}
             };
 
-            // Collect data from custom fields
             CONFIG.customFields.forEach(field => {
                 const input = document.getElementById(field.id);
                 if (input) {
