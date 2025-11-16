@@ -24,27 +24,22 @@
             max-width: 450px;
             background-color: #ffffff;
             padding: 20px;
-            /* FIX: Ensure padding is included in the width */
-            box-sizing: border-box; 
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: -1px;
+            margin-bottom: -1px; /* Overlap with container border */
             text-align: center;
-            }
-
-/* Ensure consistent maximum width for the image within the banner */
+        }
         #banner img {
-            max-width: 100%; 
-            max-height: 60px;
+            max-width: 100%;
+            max-height: 60px; /* Max height for the logo */
             display: block;
             margin: 0 auto;
         }
+
         .container {
             background-color: #ffffff;
             padding: 30px;
-            /* FIX: Ensure padding is included in the width */
-            box-sizing: border-box; 
             border-radius: 12px;
             /* Adjust border radius if banner is present */
             border-top-left-radius: 0;
@@ -224,10 +219,10 @@
         // ======================================================================
         const CONFIG = {
             // --- Language Toggle ('en', 'de', 'sl') ---
-            language: 'en',
+            language: 'sl',
 
             // --- Branding ---
-            logoUrl: 'https://files.catbox.moe/jcjk1q.png', // Set the client's logo URL here. Empty string '' to hide banner.
+            logoUrl: 'https://placehold.co/400x100/A0C4FF/007BFF/svg?text=Client+Logo+Here', // Set the client's logo URL here. Empty string '' to hide banner.
 
             // --- Webhook URLs (Client-Specific) ---
             SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability-slots",
@@ -235,7 +230,7 @@
             
             // --- Feature Toggles ---
             features: {
-                showPrice: false,
+                showPrice: true,
             },
 
             // --- Text & Translation Strings ---
@@ -267,8 +262,8 @@
             
             // --- Custom Fields Configuration (Modular Toggle) ---
             customFields: [
-                { id: "phone", type: "tel", required: false, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
-                { id: "goal", type: "text", required: false, labels: { en: "Comment", de: "Kommentar", sl: "Opomba" } }
+                { id: "phone", type: "tel", required: true, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
+                { id: "goal", type: "text", required: false, labels: { en: "Primary Goal (Optional)", de: "Hauptziel (Optional)", sl: "Glavni cilj (Opcijsko)" } }
             ]
         };
         // ======================================================================
