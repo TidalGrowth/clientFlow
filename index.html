@@ -24,22 +24,27 @@
             max-width: 450px;
             background-color: #ffffff;
             padding: 20px;
+            /* FIX: Ensure padding is included in the width */
+            box-sizing: border-box; 
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: -1px; /* Overlap with container border */
+            margin-bottom: -1px;
             text-align: center;
-        }
+            }
+
+/* Ensure consistent maximum width for the image within the banner */
         #banner img {
-            max-width: 100%;
-            max-height: 60px; /* Max height for the logo */
+            max-width: 100%; 
+            max-height: 60px;
             display: block;
             margin: 0 auto;
         }
-
         .container {
             background-color: #ffffff;
             padding: 30px;
+            /* FIX: Ensure padding is included in the width */
+            box-sizing: border-box; 
             border-radius: 12px;
             /* Adjust border radius if banner is present */
             border-top-left-radius: 0;
