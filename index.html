@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale-1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="lang-title-tag"></title>
 <style>
 body {
@@ -208,6 +208,7 @@ text-align: center;
 </div>
 </div>
 
+<input type="hidden" id="selectedServiceId" required>
 <input type="hidden" id="selectedServiceDuration" required>
 <input type="hidden" id="selectedSpecialistId" required>
 <input type="hidden" id="selectedTimeSlot" required>
@@ -231,8 +232,8 @@ logoUrl: 'https://files.catbox.moe/jcjk1q.png', // Set the client's logo URL her
 
 // --- Webhook URLs (Client-Specific) ---
 SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability-slots",
-            BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook-test/booking-creator", // Placeholder
-            BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator", // Placeholder
+            // IMPORTANT: Use the production webhook URL for the Booking Creator workflow
+            BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
 
 // --- Feature Toggles ---
 features: {
@@ -252,11 +253,13 @@ title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service
 }
 },
 
-// --- Service Configuration ---
+// --- Service Configuration (UPDATED FOR DOWNTIME FEATURE) ---
 services: [
-{ name: "30 min Call", duration: 30, price: 50 },
-{ name: "60 min Strategy", duration: 60, price: 90 },
-{ name: "90 min Planning", duration: 90, price: 150 }
+{ id: "SVC_CALL", name: "30 min Call", duration: 30, price: 50 },
+{ id: "SVC_STRATEGY", name: "60 min Strategy", duration: 60, price: 90 },
+{ id: "SVC_PLANNING", name: "90 min Planning", duration: 90, price: 150 },
+// NEW: Full Color service ID matches the Service_Definitions sheet ID
+{ id: "SVC_COLOR", name: "Full Color (2h, Split)", duration: 120, price: 180 } 
 ],
 
 // --- Specialist Configuration (Modular Toggle) ---
@@ -289,6 +292,8 @@ const form = document.getElementById('bookingForm');
 const bannerDiv = document.getElementById('banner');
 const clientLogoImg = document.getElementById('client-logo');
 
+// --- UPDATED: Selected inputs
+const selectedServiceId = document.getElementById('selectedServiceId'); // New ID field
 const selectedServiceDuration = document.getElementById('selectedServiceDuration');
 const selectedSpecialistId = document.getElementById('selectedSpecialistId');
 const selectedTimeSlot = document.getElementById('selectedTimeSlot');
@@ -369,21 +374,29 @@ customFieldsContainer.appendChild(formGroup);
 }
 
 function renderServices() {
+serviceContainer.innerHTML = '';
 CONFIG.services.forEach(service => {
 const button = createSelectionButton(
 service.name,
 'service-btn',
-{ 'data-duration': service.duration, 'data-price': service.price }
+{ 
+    'data-duration': service.duration, 
+    'data-price': service.price,
+    'data-id': service.id // Include the new service ID
+}
 );
 button.addEventListener('click', () => {
-handleSelection(button, serviceContainer, selectedServiceDuration, service.duration);
-if (CONFIG.features.showPrice && service.price) {
-priceDisplay.textContent = `${lang.pricePrefix}${service.price}${lang.priceSuffix}`;
-priceDisplay.classList.remove('hidden');
-} else {
-priceDisplay.classList.add('hidden');
-}
-checkAvailability();
+    // UPDATED: Handle selection to track both ID and Duration
+    handleSelection(button, serviceContainer, selectedServiceId, service.id);
+    selectedServiceDuration.value = service.duration; 
+
+    if (CONFIG.features.showPrice && service.price) {
+        priceDisplay.textContent = `${lang.pricePrefix}${service.price}${lang.priceSuffix}`;
+        priceDisplay.classList.remove('hidden');
+    } else {
+        priceDisplay.classList.add('hidden');
+    }
+    checkAvailability();
 });
 serviceContainer.appendChild(button);
 });
@@ -410,12 +423,15 @@ specialistContainer.appendChild(button);
 });
 }
 
-// --- 5. DYNAMIC AVAILABILITY CHECK & FORM SUBMISSION (Same as previous, omitted for brevity but present in actual file) ---
+// --- 5. DYNAMIC AVAILABILITY CHECK & FORM SUBMISSION (Updated) ---
 
 async function checkAvailability() {
 const dateString = dateInput.value;
 const workerId = selectedSpecialistId.value;
+// UPDATED: Send the Service ID instead of just the duration
+const serviceId = selectedServiceId.value; 
 const duration = selectedServiceDuration.value;
+
 
 slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.statusLoading}</p>`;
 selectedTimeSlot.value = '';
@@ -423,7 +439,7 @@ submitBtn.disabled = true;
 statusDiv.textContent = '';
 statusDiv.className = '';
 
-if (!dateString || !workerId || !duration) {
+if (!dateString || !workerId || !serviceId) {
 slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.slotsPlaceholder}</p>`;
 return;
 }
@@ -435,7 +451,8 @@ headers: { 'Content-Type': 'application/json' },
 body: JSON.stringify({ 
 dateString: dateString,
 workerId: workerId,
-duration: duration
+serviceId: serviceId, // Send the ID for complex booking logic
+duration: duration // Keep duration for now until checker logic is updated
 })
 });
 if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -471,21 +488,34 @@ slotContainer.appendChild(button);
 async function handleFormSubmission(e) {
 e.preventDefault();
 
+const serviceId = selectedServiceId.value;
+const specialistId = selectedSpecialistId.value;
+const timeSlot = selectedTimeSlot.value; // e.g., "09:00"
+const date = dateInput.value; // e.g., "2025-11-25"
+
+// COMBINE DATE AND TIME INTO ISO 8601 FORMAT (Required for n8n Calendar node)
+// Example: 2025-11-25T09:00:00.000Z
+const bookingStartTime = `${date}T${timeSlot}:00.000Z`;
+
 const payload = {
-name: document.getElementById('name').value,
-email: document.getElementById('email').value,
-date: dateInput.value,
-timeSlot: selectedTimeSlot.value,
-serviceDuration: selectedServiceDuration.value,
-specialistId: selectedSpecialistId.value,
-customData: {}
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    
+    // Core Booking Data for the Creator Workflow
+    bookingStartTime: bookingStartTime, 
+    serviceId: serviceId, 
+    specialistId: specialistId,
+    clientName: document.getElementById('name').value,
+
+    // Custom Fields
+    customData: {}
 };
 
 CONFIG.customFields.forEach(field => {
-const input = document.getElementById(field.id);
-if (input) {
-payload.customData[field.id] = input.value;
-}
+    const input = document.getElementById(field.id);
+    if (input) {
+        payload.customData[field.id] = input.value;
+    }
 });
 
 submitBtn.disabled = true;
@@ -494,27 +524,30 @@ statusDiv.textContent = lang.statusBooking;
 statusDiv.className = '';
 
 try {
-const response = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify(payload)
-});
-const result = await response.json();
+    const response = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const result = await response.json();
 
-if (response.ok && result.status === 'success') {
-statusDiv.className = 'success';
-statusDiv.textContent = lang.statusSuccess;
-form.reset();
-clearAllSelections();
-} else {
-throw new Error(result.message || 'Unknown error');
-}
+    // The Booking Creator should return a status object with success/fail
+    if (response.ok && result && result.status === 'success') {
+        statusDiv.className = 'success';
+        statusDiv.textContent = lang.statusSuccess;
+        form.reset();
+        clearAllSelections();
+    } else {
+        // If the webhook returns an error (e.g., booked slot, conflict)
+        const errorMessage = result && result.message ? result.message : response.statusText;
+        throw new Error(errorMessage || 'Unknown error');
+    }
 } catch (error) {
-statusDiv.className = 'error';
-statusDiv.textContent = `${lang.statusFailed}${error.message}`;
+    statusDiv.className = 'error';
+    statusDiv.textContent = `${lang.statusFailed}${error.message}`;
 } finally {
-submitBtn.disabled = false;
-submitBtn.textContent = lang.submit;
+    submitBtn.disabled = false;
+    submitBtn.textContent = lang.submit;
 }
 }
 
@@ -545,6 +578,7 @@ btn.classList.remove('selected');
 });
 slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.slotsPlaceholder}</p>`;
 priceDisplay.classList.add('hidden');
+selectedServiceId.value = ''; // NEW: Clear service ID
 selectedServiceDuration.value = '';
 if (CONFIG.specialists.length > 0) {
 selectedSpecialistId.value = '';
