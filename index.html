@@ -186,8 +186,9 @@ input:focus {
    ========================================= */
 .selection-grid {
     display: grid;
+    /* Auto-fit grid ensures items stay same size */
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 8px; /* Tighter gap */
+    gap: 8px; 
 }
 
 #service-container.selection-grid {
@@ -546,3 +547,346 @@ function toggleTheme() {
     if (document.body.classList.contains('dark-mode')) {
         iconSun.classList.add('hidden');
         iconMoon.classList.remove('hidden');
+        iconMoon.textContent = '☀️'; 
+    } else {
+        iconSun.classList.remove('hidden');
+        iconMoon.classList.add('hidden');
+        iconSun.textContent = '🌙'; 
+    }
+}
+// Init icon state
+iconSun.textContent = '🌙';
+
+// --- RENDER FUNCTIONS ---
+
+function applyBranding() {
+    if (CONFIG.logoUrl) {
+        clientLogoImg.src = CONFIG.logoUrl;
+        bannerDiv.classList.remove('hidden');
+    }
+}
+
+function applyLanguage() {
+    document.getElementById('lang-title-tag').textContent = lang.title;
+    document.getElementById('lang-title').textContent = lang.title;
+    document.getElementById('lang-name').textContent = lang.name;
+    document.getElementById('lang-email').textContent = lang.email;
+    document.getElementById('lang-service').textContent = lang.service;
+    document.getElementById('lang-specialist').textContent = lang.specialist;
+    document.getElementById('lang-date').textContent = lang.date;
+    document.getElementById('lang-slots').textContent = lang.slots;
+    document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
+    submitBtn.textContent = lang.submit;
+    langBtnNext.textContent = lang.btnNext;
+}
+
+function renderCustomFields() {
+    CONFIG.customFields.forEach(field => {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        const label = document.createElement('label');
+        label.htmlFor = field.id;
+        label.textContent = field.labels[CONFIG.language];
+        if (field.required) label.classList.add('required');
+        const input = document.createElement('input');
+        input.type = field.type;
+        input.id = field.id;
+        input.name = field.id;
+        if (field.required) input.required = true;
+        formGroup.appendChild(label);
+        formGroup.appendChild(input);
+        customFieldsContainer.appendChild(formGroup);
+    });
+}
+
+function renderServices() {
+    serviceContainer.innerHTML = '';
+    CONFIG.services.forEach(service => {
+        const button = createSelectionButton(service.name, 'service-btn', { 
+            'data-duration': service.duration, 
+            'data-price': service.price,
+            'data-id': service.id 
+        });
+        button.addEventListener('click', () => {
+            handleSelection(button, serviceContainer, selectedServiceId, service.id);
+            selectedServiceDuration.value = service.duration; 
+            if (CONFIG.features.showPrice && service.price) {
+                priceDisplay.textContent = `${lang.pricePrefix}${service.price}${lang.priceSuffix}`;
+                priceDisplay.classList.remove('hidden');
+            } else {
+                priceDisplay.classList.add('hidden');
+            }
+            nextSlotsContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        serviceContainer.appendChild(button);
+    });
+}
+
+function renderSpecialists() {
+    if (CONFIG.specialists.length === 0) {
+        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
+        specialistModule.classList.add('hidden');
+        return;
+    }
+    specialistModule.classList.remove('hidden');
+    CONFIG.specialists.forEach(specialist => {
+        const button = createSelectionButton(specialist.name, 'specialist-btn', { 'data-id': specialist.id });
+        button.addEventListener('click', () => {
+            handleSelection(button, specialistContainer, selectedSpecialistId, specialist.id);
+            nextSlotsContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        specialistContainer.appendChild(button);
+    });
+}
+
+async function fetchNextAvailableSlots() {
+    if (!selectedServiceId.value) {
+        alert("Please select a service first.");
+        return;
+    }
+
+    const originalBtnText = langBtnNext.textContent;
+    langBtnNext.textContent = lang.btnNextLoading;
+    btnNextAvailable.disabled = true;
+    nextSlotsContainer.innerHTML = '';
+    nextSlotsContainer.classList.remove('hidden');
+
+    try {
+        const response = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) throw new Error("API Error");
+        const data = await response.json();
+        const allSlots = data.slots || []; 
+
+        const currentSpecId = selectedSpecialistId.value;
+        const serviceDuration = parseInt(selectedServiceDuration.value) || 30;
+
+        let filteredSlots = allSlots;
+        if (currentSpecId) {
+            filteredSlots = filteredSlots.filter(s => s.specialistId === currentSpecId);
+        }
+
+        const top5 = filteredSlots.slice(0, 5);
+
+        if (top5.length === 0) {
+            nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:14px; padding:10px;">${lang.statusNoSlots}</p>`;
+        } else {
+            top5.forEach(slot => {
+                const dateObj = new Date(slot.date);
+                const dayName = dateObj.toLocaleDateString(CONFIG.language, { weekday: 'long' });
+                const dateStr = dateObj.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'short' });
+                
+                const specObj = CONFIG.specialists.find(s => s.id === slot.specialistId);
+                const specName = specObj ? specObj.name : "Specialist";
+
+                const card = document.createElement('div');
+                card.className = 'next-slot-card';
+                card.innerHTML = `
+                    <div class="next-slot-info">
+                        <span class="slot-day-date">${dayName}, ${dateStr}</span>
+                        <span class="slot-specialist">${specName}</span>
+                    </div>
+                    <span class="slot-time-badge">${slot.startTime}</span>
+                `;
+
+                card.addEventListener('click', () => {
+                    dateInput.value = slot.date;
+                    
+                    if (!selectedSpecialistId.value || selectedSpecialistId.value !== slot.specialistId) {
+                        selectedSpecialistId.value = slot.specialistId;
+                        specialistContainer.querySelectorAll('.specialist-btn').forEach(btn => {
+                            if (btn.getAttribute('data-id') === slot.specialistId) {
+                                handleSelection(btn, specialistContainer, selectedSpecialistId, slot.specialistId);
+                            }
+                        });
+                    }
+                    nextSlotsContainer.classList.add('hidden');
+                    autoSelectTime(slot.startTime);
+                });
+
+                nextSlotsContainer.appendChild(card);
+            });
+        }
+
+    } catch (e) {
+        console.error(e);
+        nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:14px;">${lang.statusError}</p>`;
+    } finally {
+        langBtnNext.textContent = originalBtnText;
+        btnNextAvailable.disabled = false;
+    }
+}
+
+async function autoSelectTime(targetTime) {
+    await checkAvailability();
+    
+    setTimeout(() => {
+        const buttons = slotContainer.querySelectorAll('.slot-button');
+        let found = false;
+        buttons.forEach(btn => {
+            const btnTime = btn.getAttribute('data-time').replace(/^0/, '');
+            const target = targetTime.replace(/^0/, '');
+            
+            if (btnTime === target) {
+                btn.click();
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                found = true;
+            }
+        });
+        if (!found) {
+            console.warn("Slot from 'Next 5' not found.");
+        }
+    }, 100);
+}
+
+async function checkAvailability() {
+    const dateString = dateInput.value;
+    const workerId = selectedSpecialistId.value;
+    const serviceId = selectedServiceId.value; 
+    const duration = selectedServiceDuration.value;
+
+    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
+    selectedTimeSlot.value = '';
+    submitBtn.disabled = true;
+    statusDiv.textContent = '';
+    statusDiv.className = '';
+
+    if (!dateString || !workerId || !serviceId) {
+        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+        return;
+    }
+
+    try {
+        const response = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                dateString: dateString,
+                workerId: workerId,
+                serviceId: serviceId, 
+                duration: duration 
+            })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const availableSlots = Array.isArray(data) ? data : data.slots;
+        renderSlotButtons(availableSlots);
+    } catch (error) {
+        console.error('Error fetching slots:', error);
+        statusDiv.className = 'error';
+        statusDiv.textContent = lang.statusError;
+        slotContainer.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
+    }
+}
+
+function renderSlotButtons(slots) {
+    slotContainer.innerHTML = '';
+    if (!slots || slots.length === 0) {
+        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
+        return;
+    }
+    slots.forEach(slotTime => {
+        const button = createSelectionButton(slotTime, 'slot-button', { 'data-time': slotTime });
+        button.addEventListener('click', () => {
+            handleSelection(button, slotContainer, selectedTimeSlot, slotTime);
+            submitBtn.disabled = false;
+        });
+        slotContainer.appendChild(button);
+    });
+}
+
+async function handleFormSubmission(e) {
+    e.preventDefault();
+    const serviceId = selectedServiceId.value;
+    const specialistId = selectedSpecialistId.value;
+    const timeSlot = selectedTimeSlot.value;
+    const date = dateInput.value;
+    const bookingStartTime = `${date}T${timeSlot}:00.000Z`;
+
+    const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        bookingStartTime: bookingStartTime, 
+        serviceId: serviceId, 
+        specialistId: specialistId,
+        clientName: document.getElementById('name').value,
+        customData: {}
+    };
+    CONFIG.customFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input) payload.customData[field.id] = input.value;
+    });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = lang.statusBooking;
+    statusDiv.textContent = lang.statusBooking;
+    statusDiv.className = '';
+
+    try {
+        const response = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (response.ok && result && result.status === 'success') {
+            statusDiv.className = 'success';
+            statusDiv.textContent = lang.statusSuccess;
+            form.reset();
+            clearAllSelections();
+            nextSlotsContainer.classList.add('hidden'); 
+        } else {
+            throw new Error(result.message || response.statusText);
+        }
+    } catch (error) {
+        statusDiv.className = 'error';
+        statusDiv.textContent = `${lang.statusFailed}${error.message}`;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = lang.submit;
+    }
+}
+
+function createSelectionButton(text, className, dataAttributes) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = className + ' selection-btn';
+    button.textContent = text;
+    for (const key in dataAttributes) {
+        button.setAttribute(key, dataAttributes[key]);
+    }
+    return button;
+}
+
+function handleSelection(clickedButton, container, hiddenInput, value) {
+    container.querySelectorAll('.selection-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    clickedButton.classList.add('selected');
+    hiddenInput.value = value;
+}
+
+function clearAllSelections() {
+    document.querySelectorAll('.selection-btn.selected').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+    priceDisplay.classList.add('hidden');
+    selectedServiceId.value = ''; 
+    selectedServiceDuration.value = '';
+    if (CONFIG.specialists.length > 0) {
+        selectedSpecialistId.value = '';
+    } else {
+        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
+    }
+    selectedTimeSlot.value = '';
+    submitBtn.disabled = true;
+}
+</script>
+</body>
+</html>
