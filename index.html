@@ -5,223 +5,331 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="lang-title-tag"></title>
 <style>
-/* ... EXISTING STYLES REMAIN THE SAME ... */
+/* =========================================
+   1. DESIGN SYSTEM & VARIABLES
+   ========================================= */
+:root {
+    /* Color Palette */
+    --primary: #1A1A1A;       /* Jet Black - Text */
+    --secondary: #F5F5F7;     /* Cultured White - Backgrounds */
+    --surface: #FFFFFF;       /* Pure White - Cards */
+    --accent: #2962FF;        /* Royal Blue - Actions */
+    --accent-hover: #1e4bd1;  /* Darker Blue */
+    --support: #E0E0E0;       /* Light Grey - Borders */
+    --text-sub: #666666;      /* Subtitles */
+    --danger: #D32F2F;        /* Errors */
+    --success: #388E3C;       /* Success */
+
+    /* Spacing & Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f7f9fc;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--secondary);
+    color: var(--primary);
     display: flex;
-    flex-direction: column; 
-    justify-content: flex-start;
+    flex-direction: column;
     align-items: center;
     min-height: 100vh;
     margin: 0;
     padding: 40px 20px;
     box-sizing: border-box;
 }
+
+/* =========================================
+   2. LAYOUT & CONTAINERS
+   ========================================= */
 #banner {
     width: 100%;
-    max-width: 450px;
-    background-color: #ffffff;
-    padding: 20px;
-    box-sizing: border-box; 
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: -1px;
-    text-align: center;
+    max-width: 480px;
+    background-color: var(--surface);
+    padding: 24px;
+    box-sizing: border-box;
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+    border-bottom: 1px solid var(--secondary); /* Subtle divider */
+    margin-bottom: 0;
 }
+
 #banner img {
-    max-width: 100%; 
+    max-width: 160px;
     max-height: 60px;
     display: block;
     margin: 0 auto;
+    object-fit: contain;
 }
+
 .container {
-    background-color: #ffffff;
-    padding: 30px;
-    box-sizing: border-box; 
-    border-radius: 12px;
+    background-color: var(--surface);
+    padding: 32px;
+    box-sizing: border-box;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 480px;
+    transition: var(--transition);
+}
+
+/* Remove top corners if banner is active */
+#banner:not(.hidden) + .container {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    width: 100%;
-    max-width: 450px;
 }
+
 h2 {
-    color: #333;
-    margin-bottom: 25px;
-    font-weight: 600;
+    color: var(--primary);
+    margin-top: 0;
+    margin-bottom: 32px;
+    font-weight: 700;
+    font-size: 24px;
     text-align: center;
+    letter-spacing: -0.5px;
 }
+
+/* =========================================
+   3. FORM ELEMENTS
+   ========================================= */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
+
 label {
     display: block;
-    margin-bottom: 10px;
-    color: #555;
-    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 14px;
 }
+
 label.required::after {
     content: " *";
-    color: red;
-    font-weight: bold;
+    color: var(--accent);
 }
-input[type="text"], input[type="email"], input[type="tel"], input[type="date"] {
+
+input[type="text"], 
+input[type="email"], 
+input[type="tel"], 
+input[type="date"] {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 14px;
+    border: 1px solid var(--support);
+    border-radius: var(--radius-sm);
     box-sizing: border-box;
     font-size: 16px;
+    font-family: inherit;
+    background-color: var(--surface);
+    transition: var(--transition);
+    color: var(--primary);
 }
+
 input:focus {
-    border-color: #007bff;
+    border-color: var(--accent);
     outline: none;
+    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1);
 }
+
+/* =========================================
+   4. BUTTONS & GRIDS (The Fix)
+   ========================================= */
+/* We use GRID instead of Flex to ensure equal sizing */
 .selection-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    display: grid;
+    /* This magic line creates equal columns that auto-fit */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
 }
+
+/* Special grid for wider items like Services */
+#service-container.selection-grid {
+    grid-template-columns: 1fr; /* Stack vertically for clarity, or use minmax(140px, 1fr) for grid */
+}
+@media (min-width: 400px) {
+    #service-container.selection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+}
+
 .selection-btn, .slot-button {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
+    background-color: var(--surface);
+    border: 1px solid var(--support);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--primary);
     cursor: pointer;
-    border-radius: 6px;
-    font-size: 15px;
-    transition: all 0.2s;
-    flex-grow: 1;
+    transition: var(--transition);
     text-align: center;
-    min-width: 80px;
+    
+    /* FIX FOR JUMPING: */
+    box-sizing: border-box; 
+    height: 100%; /* Fill grid cell */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
 }
+
 .selection-btn:hover, .slot-button:hover {
-    background-color: #e9e9e9;
-    border-color: #aaa;
+    border-color: var(--accent);
+    background-color: rgba(41, 98, 255, 0.04);
+    transform: translateY(-1px);
 }
+
+/* SELECTED STATE */
 .selection-btn.selected, .slot-button.selected {
-    background-color: #007bff;
+    background-color: var(--accent);
+    border-color: var(--accent);
     color: white;
-    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
     font-weight: 600;
+    transform: translateY(0);
 }
-.slot-button.selected {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
+
+/* Disabled state for time slots */
+.slot-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
-#slot-container {
-    min-height: 40px; 
-    margin-top: 10px;
-}
+
+/* Price Display */
 #price-display {
     text-align: right;
-    font-size: 1.1em;
+    font-size: 14px;
     font-weight: 600;
-    color: #333;
-    margin-top: 15px;
+    color: var(--accent);
+    margin-top: 8px;
 }
-button[type="submit"] {
-    width: 100%;
-    padding: 12px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    margin-top: 10px;
-}
-button[type="submit"]:disabled {
-    background-color: #a0c4ff;
-    cursor: not-allowed;
-}
-#status {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 8px;
-    text-align: center;
-}
-.error { background-color: #ffe0e0; color: #cc0000; }
-.success { background-color: #e0fff0; color: #008000; }
-.hidden { display: none; }
 
-/* --- NEW STYLES: Next Available Slots --- */
+/* =========================================
+   5. NEXT 5 SLOTS (Unified Design)
+   ========================================= */
 #next-slots-wrapper {
-    margin-bottom: 20px;
-    border: 1px dashed #ccc;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #fafafa;
+    margin-bottom: 24px;
 }
+
 #btn-next-available {
     width: 100%;
-    padding: 10px;
-    background-color: #28a745; /* Green to distinguish */
-    color: white;
-    border: none;
-    border-radius: 6px;
+    padding: 14px;
+    background-color: transparent;
+    border: 1px dashed var(--accent);
+    color: var(--accent);
+    border-radius: var(--radius-sm);
     font-size: 15px;
-    cursor: pointer;
     font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
+
 #btn-next-available:hover {
-    background-color: #218838;
+    background-color: rgba(41, 98, 255, 0.05);
+    border-style: solid;
 }
-#btn-next-available:disabled {
-    background-color: #94d3a2;
-    cursor: not-allowed;
-}
+
 #next-slots-container {
-    margin-top: 15px;
+    margin-top: 16px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
+
 .next-slot-card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 12px;
+    background-color: var(--surface);
+    border: 1px solid var(--support);
+    border-radius: var(--radius-sm);
+    padding: 16px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
+
 .next-slot-card:hover {
-    border-color: #007bff;
-    background-color: #f0f8ff;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
 }
+
 .next-slot-info {
     display: flex;
     flex-direction: column;
 }
+
 .slot-day-date {
-    font-weight: 600;
-    color: #333;
-    font-size: 0.95em;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 15px;
 }
+
 .slot-specialist {
-    font-size: 0.85em;
-    color: #666;
-    margin-top: 2px;
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 4px;
 }
+
 .slot-time-badge {
-    background-color: #e9ecef;
-    color: #333;
-    padding: 6px 12px;
+    background-color: var(--secondary);
+    color: var(--primary);
+    padding: 8px 14px;
     border-radius: 20px;
-    font-weight: bold;
-    font-size: 0.9em;
+    font-weight: 700;
+    font-size: 14px;
 }
+
+/* =========================================
+   6. SUBMIT BUTTON & STATUS
+   ========================================= */
+button[type="submit"] {
+    width: 100%;
+    padding: 16px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px rgba(41, 98, 255, 0.2);
+}
+
+button[type="submit"]:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(41, 98, 255, 0.25);
+}
+
+button[type="submit"]:disabled {
+    background-color: var(--support);
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+#status {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+.error { background-color: #FDEDED; color: var(--danger); }
+.success { background-color: #EDF7ED; color: var(--success); }
+.hidden { display: none; }
+
 </style>
 </head>
 <body>
@@ -271,7 +379,7 @@ button[type="submit"]:disabled {
     <div class="form-group">
         <label id="lang-slots"></label>
         <div id="slot-container" class="selection-grid">
-            <p id="lang-slots-placeholder" style="color:#888; margin:0; width: 100%;"></p>
+            <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);"></p>
         </div>
     </div>
 
@@ -288,7 +396,7 @@ button[type="submit"]:disabled {
 
 <script>
 // ======================================================================
-// --- 1. MODULAR CONFIGURATION OBJECT ---
+// --- 1. CONFIGURATION ---
 // ======================================================================
 const CONFIG = {
     language: 'en',
@@ -297,7 +405,7 @@ const CONFIG = {
     // --- Webhook URLs ---
     SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
     BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
-    NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available", // NEW
+    NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
 
     features: {
         showPrice: false,
@@ -305,16 +413,16 @@ const CONFIG = {
 
     strings: {
         en: {
-            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "-- Select service and date --", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error fetching slots.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Next 5 Available Slots", btnNextLoading: "Finding Slots..."
+            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select a service and date to see times", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error fetching slots.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
+            btnNext: "Find Next Available Slots", btnNextLoading: "Searching..."
         },
         de: {
-            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung wählen", specialist: "Spezialist wählen", date: "Datum wählen", slots: "Verfügbare Termine", slotsPlaceholder: "-- Dienstleistung und Datum wählen --", submit: "Termin buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine verfügbar.", statusError: "Fehler.", statusBooking: "Termin wird gebucht...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
-            btnNext: "Nächste 5 freien Termine", btnNextLoading: "Suche..."
+            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung wählen", specialist: "Spezialist wählen", date: "Datum wählen", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Termin buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine verfügbar.", statusError: "Fehler.", statusBooking: "Termin wird gebucht...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
+            btnNext: "Nächste freie Termine finden", btnNextLoading: "Suche..."
         },
         sl: {
-            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Izberite storitev", specialist: "Izberite specialista", date: "Izberite datum", slots: "Prosti termini", slotsPlaceholder: "-- Izberite storitev in datum --", submit: "Rezerviraj termin", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni prostih terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem..."
+            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Izberite storitev", specialist: "Izberite specialista", date: "Izberite datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum za prikaz terminov", submit: "Rezerviraj termin", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni prostih terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
+            btnNext: "Najdi naslednje proste termine", btnNextLoading: "Iščem..."
         }
     },
 
@@ -353,7 +461,6 @@ const form = document.getElementById('bookingForm');
 const bannerDiv = document.getElementById('banner');
 const clientLogoImg = document.getElementById('client-logo');
 
-// --- NEW Elements ---
 const btnNextAvailable = document.getElementById('btn-next-available');
 const nextSlotsContainer = document.getElementById('next-slots-container');
 const langBtnNext = document.getElementById('lang-btn-next');
@@ -376,15 +483,12 @@ document.addEventListener('DOMContentLoaded', () => {
     dateInput.min = today.toISOString().split('T')[0];
 
     dateInput.addEventListener('change', () => {
-        // HIDE Next Slots if user picks a date manually
         nextSlotsContainer.classList.add('hidden');
         nextSlotsContainer.innerHTML = '';
         checkAvailability();
     });
     
-    // NEW: Listener for Next Available Button
     btnNextAvailable.addEventListener('click', fetchNextAvailableSlots);
-    
     form.addEventListener('submit', handleFormSubmission);
 });
 
@@ -394,11 +498,6 @@ function applyBranding() {
     if (CONFIG.logoUrl) {
         clientLogoImg.src = CONFIG.logoUrl;
         bannerDiv.classList.remove('hidden');
-        document.querySelector('.container').style.boxShadow = '0 8px 12px rgba(0, 0, 0, 0.05)';
-    } else {
-        document.querySelector('.container').style.borderTopLeftRadius = '12px';
-        document.querySelector('.container').style.borderTopRightRadius = '12px';
-        document.querySelector('.container').style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.05)';
     }
 }
 
@@ -413,7 +512,6 @@ function applyLanguage() {
     document.getElementById('lang-slots').textContent = lang.slots;
     document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
     submitBtn.textContent = lang.submit;
-    // New Button Label
     langBtnNext.textContent = lang.btnNext;
 }
 
@@ -453,7 +551,6 @@ function renderServices() {
             } else {
                 priceDisplay.classList.add('hidden');
             }
-            // Hide next slots if service changes
             nextSlotsContainer.classList.add('hidden');
             checkAvailability();
         });
@@ -472,7 +569,6 @@ function renderSpecialists() {
         const button = createSelectionButton(specialist.name, 'specialist-btn', { 'data-id': specialist.id });
         button.addEventListener('click', () => {
             handleSelection(button, specialistContainer, selectedSpecialistId, specialist.id);
-            // Hide next slots if specialist changes
             nextSlotsContainer.classList.add('hidden');
             checkAvailability();
         });
@@ -480,15 +576,12 @@ function renderSpecialists() {
     });
 }
 
-// --- NEW: FETCH NEXT AVAILABLE SLOTS ---
 async function fetchNextAvailableSlots() {
-    // 1. Validation: Must have a service selected
     if (!selectedServiceId.value) {
         alert("Please select a service first.");
         return;
     }
 
-    // 2. UI State: Loading
     const originalBtnText = langBtnNext.textContent;
     langBtnNext.textContent = lang.btnNextLoading;
     btnNextAvailable.disabled = true;
@@ -503,34 +596,26 @@ async function fetchNextAvailableSlots() {
         
         if (!response.ok) throw new Error("API Error");
         const data = await response.json();
-        const allSlots = data.slots || []; // Raw list from Spreadsheet
+        const allSlots = data.slots || []; 
 
-        // 3. FILTERING (Client-Side)
-        // We only show slots that match the selected specialist (if any)
-        // AND handle duration logic (Basic MVP: just show start times)
         const currentSpecId = selectedSpecialistId.value;
         const serviceDuration = parseInt(selectedServiceDuration.value) || 30;
 
         let filteredSlots = allSlots;
-
-        // Filter by Specialist (if one is explicitly selected)
         if (currentSpecId) {
             filteredSlots = filteredSlots.filter(s => s.specialistId === currentSpecId);
         }
 
-        // We slice the top 5 matches
         const top5 = filteredSlots.slice(0, 5);
 
-        // 4. RENDER CARDS
         if (top5.length === 0) {
-            nextSlotsContainer.innerHTML = `<p style="text-align:center; color:#666;">${lang.statusNoSlots}</p>`;
+            nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:14px; padding:10px;">${lang.statusNoSlots}</p>`;
         } else {
             top5.forEach(slot => {
                 const dateObj = new Date(slot.date);
                 const dayName = dateObj.toLocaleDateString(CONFIG.language, { weekday: 'long' });
                 const dateStr = dateObj.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'short' });
                 
-                // Find specialist name
                 const specObj = CONFIG.specialists.find(s => s.id === slot.specialistId);
                 const specName = specObj ? specObj.name : "Specialist";
 
@@ -544,28 +629,18 @@ async function fetchNextAvailableSlots() {
                     <span class="slot-time-badge">${slot.startTime}</span>
                 `;
 
-                // CLICK ACTION: Auto-fill form and check real availability
                 card.addEventListener('click', () => {
-                    // 1. Set Date
                     dateInput.value = slot.date;
                     
-                    // 2. Set Specialist (if not already set)
                     if (!selectedSpecialistId.value || selectedSpecialistId.value !== slot.specialistId) {
                         selectedSpecialistId.value = slot.specialistId;
-                        // Visually select the button
                         specialistContainer.querySelectorAll('.specialist-btn').forEach(btn => {
                             if (btn.getAttribute('data-id') === slot.specialistId) {
                                 handleSelection(btn, specialistContainer, selectedSpecialistId, slot.specialistId);
                             }
                         });
                     }
-
-                    // 3. Hide the suggestions list
                     nextSlotsContainer.classList.add('hidden');
-
-                    // 4. Trigger Real-time Check (Standard Flow)
-                    // We pass a flag or just run checkAvailability, then auto-select time?
-                    // Better: Run checkAvailability, then try to select the time button.
                     autoSelectTime(slot.startTime);
                 });
 
@@ -575,7 +650,7 @@ async function fetchNextAvailableSlots() {
 
     } catch (e) {
         console.error(e);
-        nextSlotsContainer.innerHTML = `<p style="text-align:center; color:red;">${lang.statusError}</p>`;
+        nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:14px;">${lang.statusError}</p>`;
     } finally {
         langBtnNext.textContent = originalBtnText;
         btnNextAvailable.disabled = false;
@@ -583,36 +658,43 @@ async function fetchNextAvailableSlots() {
 }
 
 async function autoSelectTime(targetTime) {
-    // First, trigger the standard availability check for that day
     await checkAvailability();
     
-    // Then try to find and click the specific time button
-    const buttons = slotContainer.querySelectorAll('.slot-button');
-    let found = false;
-    buttons.forEach(btn => {
-        if (btn.getAttribute('data-time') === targetTime) {
-            btn.click();
-            btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            found = true;
+    // Slight delay to ensure DOM is rendered
+    setTimeout(() => {
+        const buttons = slotContainer.querySelectorAll('.slot-button');
+        let found = false;
+        buttons.forEach(btn => {
+            // Compare times (standardize format "09:00" vs "9:00")
+            const btnTime = btn.getAttribute('data-time').replace(/^0/, '');
+            const target = targetTime.replace(/^0/, '');
+            
+            if (btnTime === target) {
+                btn.click();
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                found = true;
+            }
+        });
+        if (!found) {
+            console.warn("Slot from 'Next 5' not found in real-time check. Might be taken.");
         }
-    });
+    }, 100);
 }
 
-// --- STANDARD FUNCTIONS (Existing) ---
 async function checkAvailability() {
     const dateString = dateInput.value;
     const workerId = selectedSpecialistId.value;
     const serviceId = selectedServiceId.value; 
     const duration = selectedServiceDuration.value;
 
-    slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.statusLoading}</p>`;
+    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
     selectedTimeSlot.value = '';
     submitBtn.disabled = true;
     statusDiv.textContent = '';
     statusDiv.className = '';
 
     if (!dateString || !workerId || !serviceId) {
-        slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.slotsPlaceholder}</p>`;
+        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);">${lang.slotsPlaceholder}</p>`;
         return;
     }
 
@@ -635,14 +717,14 @@ async function checkAvailability() {
         console.error('Error fetching slots:', error);
         statusDiv.className = 'error';
         statusDiv.textContent = lang.statusError;
-        slotContainer.innerHTML = `<p class="error" style="margin:0;">${lang.statusError}</p>`;
+        slotContainer.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
     }
 }
 
 function renderSlotButtons(slots) {
     slotContainer.innerHTML = '';
     if (!slots || slots.length === 0) {
-        slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.statusNoSlots}</p>`;
+        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
         return;
     }
     slots.forEach(slotTime => {
@@ -694,7 +776,7 @@ async function handleFormSubmission(e) {
             statusDiv.textContent = lang.statusSuccess;
             form.reset();
             clearAllSelections();
-            nextSlotsContainer.classList.add('hidden'); // Hide next slots on success
+            nextSlotsContainer.classList.add('hidden'); 
         } else {
             throw new Error(result.message || response.statusText);
         }
@@ -730,7 +812,7 @@ function clearAllSelections() {
     document.querySelectorAll('.selection-btn.selected').forEach(btn => {
         btn.classList.remove('selected');
     });
-    slotContainer.innerHTML = `<p style="color:#888; margin:0;">${lang.slotsPlaceholder}</p>`;
+    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);">${lang.slotsPlaceholder}</p>`;
     priceDisplay.classList.add('hidden');
     selectedServiceId.value = ''; 
     selectedServiceDuration.value = '';
