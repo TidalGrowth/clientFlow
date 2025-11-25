@@ -6,26 +6,48 @@
 <title id="lang-title-tag"></title>
 <style>
 /* =========================================
-   1. DESIGN SYSTEM & VARIABLES
+   1. DESIGN SYSTEM & VARIABLES (THEMING)
    ========================================= */
 :root {
-    /* Color Palette */
-    --primary: #1A1A1A;       /* Jet Black - Text */
-    --secondary: #F5F5F7;     /* Cultured White - Backgrounds */
-    --surface: #FFFFFF;       /* Pure White - Cards */
-    --accent: #2962FF;        /* Royal Blue - Actions */
-    --accent-hover: #1e4bd1;  /* Darker Blue */
-    --support: #E0E0E0;       /* Light Grey - Borders */
-    --text-sub: #666666;      /* Subtitles */
-    --danger: #D32F2F;        /* Errors */
-    --success: #388E3C;       /* Success */
+    /* --- LIGHT THEME (Default) --- */
+    --primary: #1A1A1A;       /* Jet Black */
+    --secondary: #F5F5F7;     /* Cultured White (Background) */
+    --surface: #FFFFFF;       /* Pure White (Card) */
+    --accent: #2962FF;        /* Royal Blue */
+    --accent-hover: #1e4bd1;
+    --accent-text: #FFFFFF;
+    --support: #E0E0E0;       /* Borders */
+    --text-sub: #666666;
+    --input-bg: #FFFFFF;
+    --slot-bg: #FFFFFF;
+    --slot-hover: rgba(41, 98, 255, 0.04);
+    --danger: #D32F2F;
+    --success: #388E3C;
+    --success-bg: #EDF7ED;
+    
+    /* Spacing & Shape */
+    --radius-input: 8px;      /* Slightly boxy for inputs */
+    --radius-pill: 50px;      /* FULL PILL for buttons */
+    --radius-card: 16px;      /* Smooth corners for container */
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 
-    /* Spacing & Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 8px 20px rgba(0,0,0,0.06);
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+/* --- DARK THEME OVERRIDES --- */
+body.dark-mode {
+    --primary: #EAEAEA;       /* Off-White text */
+    --secondary: #121212;     /* Deep Black Background */
+    --surface: #1E1E1E;       /* Dark Grey Card */
+    --accent: #5381FF;        /* Lighter Blue for contrast */
+    --accent-hover: #739aff;
+    --accent-text: #FFFFFF;
+    --support: #333333;       /* Dark Borders */
+    --text-sub: #AAAAAA;
+    --input-bg: #2C2C2C;
+    --slot-bg: #2C2C2C;
+    --slot-hover: rgba(83, 129, 255, 0.15);
+    --success: #66BB6A;
+    --success-bg: rgba(102, 187, 106, 0.1);
 }
 
 body {
@@ -37,8 +59,9 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 40px 20px;
+    padding: 20px 15px; /* Reduced padding */
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
 
 /* =========================================
@@ -46,19 +69,20 @@ body {
    ========================================= */
 #banner {
     width: 100%;
-    max-width: 480px;
+    max-width: 450px;
     background-color: var(--surface);
-    padding: 24px;
-    box-sizing: border-box;
-    border-top-left-radius: var(--radius-md);
-    border-top-right-radius: var(--radius-md);
-    border-bottom: 1px solid var(--secondary); /* Subtle divider */
+    padding: 15px;
+    box-sizing: border-box; 
+    border-top-left-radius: var(--radius-card);
+    border-top-right-radius: var(--radius-card);
+    border-bottom: 1px solid var(--support);
     margin-bottom: 0;
+    transition: background-color 0.3s ease;
 }
 
 #banner img {
-    max-width: 160px;
-    max-height: 60px;
+    max-width: 140px;
+    max-height: 50px;
     display: block;
     margin: 0 auto;
     object-fit: contain;
@@ -66,44 +90,67 @@ body {
 
 .container {
     background-color: var(--surface);
-    padding: 32px;
-    box-sizing: border-box;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
+    padding: 24px; /* Compact padding */
+    box-sizing: border-box; 
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
     width: 100%;
-    max-width: 480px;
-    transition: var(--transition);
+    max-width: 450px;
+    transition: background-color 0.3s ease, border-radius 0.3s;
 }
 
-/* Remove top corners if banner is active */
 #banner:not(.hidden) + .container {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
 
+/* --- Header Row (Title + Dark Mode Toggle) --- */
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px; /* Reduced margin */
+}
+
 h2 {
     color: var(--primary);
-    margin-top: 0;
-    margin-bottom: 32px;
+    margin: 0;
     font-weight: 700;
-    font-size: 24px;
-    text-align: center;
+    font-size: 22px; /* Slightly smaller title */
     letter-spacing: -0.5px;
 }
 
+/* Theme Toggle Button */
+.theme-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 50%;
+    color: var(--primary);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.theme-toggle:hover {
+    background-color: var(--support);
+}
+
 /* =========================================
-   3. FORM ELEMENTS
+   3. FORM ELEMENTS (COMPACT)
    ========================================= */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 12px; /* Significantly reduced spacing */
 }
 
 label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--primary);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px; /* Slightly smaller label */
 }
 
 label.required::after {
@@ -111,116 +158,107 @@ label.required::after {
     color: var(--accent);
 }
 
+/* Inputs */
 input[type="text"], 
 input[type="email"], 
 input[type="tel"], 
 input[type="date"] {
     width: 100%;
-    padding: 14px;
+    padding: 10px 12px; /* Reduced padding (height) */
     border: 1px solid var(--support);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-input);
     box-sizing: border-box;
-    font-size: 16px;
+    font-size: 15px;
     font-family: inherit;
-    background-color: var(--surface);
-    transition: var(--transition);
+    background-color: var(--input-bg);
     color: var(--primary);
+    transition: var(--transition);
 }
 
 input:focus {
     border-color: var(--accent);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.15);
 }
 
 /* =========================================
-   4. BUTTONS & GRIDS (The Fix)
+   4. BUTTONS & PILL SHAPES
    ========================================= */
-/* We use GRID instead of Flex to ensure equal sizing */
 .selection-grid {
     display: grid;
-    /* This magic line creates equal columns that auto-fit */
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px; /* Tighter gap */
 }
 
-/* Special grid for wider items like Services */
 #service-container.selection-grid {
-    grid-template-columns: 1fr; /* Stack vertically for clarity, or use minmax(140px, 1fr) for grid */
-}
-@media (min-width: 400px) {
-    #service-container.selection-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
+    /* Services often need more width for text */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
 .selection-btn, .slot-button {
-    background-color: var(--surface);
+    background-color: var(--slot-bg);
     border: 1px solid var(--support);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 14px;
+    /* THE PILL SHAPE */
+    border-radius: var(--radius-pill); 
+    padding: 10px 12px; /* Compact padding */
+    font-size: 13px;
     font-weight: 500;
     color: var(--primary);
     cursor: pointer;
     transition: var(--transition);
     text-align: center;
-    
-    /* FIX FOR JUMPING: */
     box-sizing: border-box; 
-    height: 100%; /* Fill grid cell */
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
+    min-height: 40px; /* Reduced height */
 }
 
 .selection-btn:hover, .slot-button:hover {
     border-color: var(--accent);
-    background-color: rgba(41, 98, 255, 0.04);
+    background-color: var(--slot-hover);
     transform: translateY(-1px);
 }
 
-/* SELECTED STATE */
 .selection-btn.selected, .slot-button.selected {
     background-color: var(--accent);
     border-color: var(--accent);
-    color: white;
-    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
+    color: var(--accent-text);
+    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.25);
     font-weight: 600;
     transform: translateY(0);
 }
 
-/* Disabled state for time slots */
 .slot-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
 }
 
-/* Price Display */
 #price-display {
     text-align: right;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--accent);
-    margin-top: 8px;
+    margin-top: 4px;
 }
 
 /* =========================================
-   5. NEXT 5 SLOTS (Unified Design)
+   5. NEXT 5 SLOTS (Card Design)
    ========================================= */
 #next-slots-wrapper {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 #btn-next-available {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background-color: transparent;
     border: 1px dashed var(--accent);
     color: var(--accent);
-    border-radius: var(--radius-sm);
-    font-size: 15px;
+    border-radius: var(--radius-input);
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
@@ -231,22 +269,22 @@ input:focus {
 }
 
 #btn-next-available:hover {
-    background-color: rgba(41, 98, 255, 0.05);
+    background-color: var(--slot-hover);
     border-style: solid;
 }
 
 #next-slots-container {
-    margin-top: 16px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .next-slot-card {
     background-color: var(--surface);
     border: 1px solid var(--support);
-    border-radius: var(--radius-sm);
-    padding: 16px;
+    border-radius: 12px; /* Slight pill-card hybrid */
+    padding: 12px 16px;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
@@ -256,7 +294,7 @@ input:focus {
 
 .next-slot-card:hover {
     border-color: var(--accent);
-    box-shadow: var(--shadow-sm);
+    background-color: var(--slot-hover);
     transform: translateX(4px);
 }
 
@@ -268,66 +306,67 @@ input:focus {
 .slot-day-date {
     font-weight: 700;
     color: var(--primary);
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .slot-specialist {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-sub);
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .slot-time-badge {
     background-color: var(--secondary);
     color: var(--primary);
-    padding: 8px 14px;
-    border-radius: 20px;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
+    border: 1px solid var(--support);
 }
 
 /* =========================================
-   6. SUBMIT BUTTON & STATUS
+   6. SUBMIT & STATUS
    ========================================= */
 button[type="submit"] {
     width: 100%;
-    padding: 16px;
+    padding: 14px; /* Compact */
     background-color: var(--accent);
-    color: white;
+    color: var(--accent-text);
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-pill); /* Pill Shape! */
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 16px;
+    margin-top: 12px;
     transition: var(--transition);
-    box-shadow: 0 4px 6px rgba(41, 98, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(41, 98, 255, 0.2);
 }
 
 button[type="submit"]:hover {
     background-color: var(--accent-hover);
     transform: translateY(-1px);
-    box-shadow: 0 6px 12px rgba(41, 98, 255, 0.25);
+    box-shadow: 0 6px 14px rgba(41, 98, 255, 0.3);
 }
 
 button[type="submit"]:disabled {
     background-color: var(--support);
-    color: #888;
+    color: var(--text-sub);
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
 }
 
 #status {
-    margin-top: 24px;
-    padding: 16px;
-    border-radius: var(--radius-sm);
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: var(--radius-input);
     text-align: center;
     font-size: 14px;
     font-weight: 500;
 }
-.error { background-color: #FDEDED; color: var(--danger); }
-.success { background-color: #EDF7ED; color: var(--success); }
+.error { background-color: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+.success { background-color: var(--success-bg); color: var(--success); border: 1px solid #c8e6c9; }
 .hidden { display: none; }
 
 </style>
@@ -339,59 +378,65 @@ button[type="submit"]:disabled {
 </div>
 
 <div class="container">
-<h2 id="lang-title"></h2>
-
-<form id="bookingForm">
-    <div class="form-group">
-        <label for="name" id="lang-name" class="required"></label>
-        <input type="text" id="name" required>
-    </div>
-    <div class="form-group">
-        <label for="email" id="lang-email"></label>
-        <input type="email" id="email" placeholder="Optional">
-    </div>
-
-    <div id="custom-fields-container"></div>
-
-    <div class="form-group" id="service-module">
-        <label id="lang-service" class="required"></label>
-        <div id="service-container" class="selection-grid"></div>
-        <div id="price-display" class="hidden"></div>
-    </div>
-
-    <div class="form-group hidden" id="specialist-module">
-        <label id="lang-specialist" class="required"></label>
-        <div id="specialist-container" class="selection-grid"></div>
-    </div>
-
-    <div id="next-slots-wrapper">
-        <button type="button" id="btn-next-available">
-            <span>⚡</span> <span id="lang-btn-next">See Next 5 Available Slots</span>
+    <div class="header-row">
+        <h2 id="lang-title"></h2>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Dark Mode">
+            <span id="icon-sun">☀️</span>
+            <span id="icon-moon" class="hidden">🌙</span>
         </button>
-        <div id="next-slots-container" class="hidden"></div>
     </div>
 
-    <div class="form-group">
-        <label for="date" id="lang-date" class="required"></label>
-        <input type="date" id="date" required>
-    </div>
-
-    <div class="form-group">
-        <label id="lang-slots"></label>
-        <div id="slot-container" class="selection-grid">
-            <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);"></p>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label for="name" id="lang-name" class="required"></label>
+            <input type="text" id="name" required>
         </div>
-    </div>
+        <div class="form-group">
+            <label for="email" id="lang-email"></label>
+            <input type="email" id="email" placeholder="Optional">
+        </div>
 
-    <input type="hidden" id="selectedServiceId" required>
-    <input type="hidden" id="selectedServiceDuration" required>
-    <input type="hidden" id="selectedSpecialistId" required>
-    <input type="hidden" id="selectedTimeSlot" required>
+        <div id="custom-fields-container"></div>
 
-    <button type="submit" id="lang-submit" disabled></button>
-</form>
+        <div class="form-group" id="service-module">
+            <label id="lang-service" class="required"></label>
+            <div id="service-container" class="selection-grid"></div>
+            <div id="price-display" class="hidden"></div>
+        </div>
 
-<div id="status"></div>
+        <div class="form-group hidden" id="specialist-module">
+            <label id="lang-specialist" class="required"></label>
+            <div id="specialist-container" class="selection-grid"></div>
+        </div>
+
+        <div id="next-slots-wrapper">
+            <button type="button" id="btn-next-available">
+                <span>⚡</span> <span id="lang-btn-next">See Next 5 Available Slots</span>
+            </button>
+            <div id="next-slots-container" class="hidden"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="date" id="lang-date" class="required"></label>
+            <input type="date" id="date" required>
+        </div>
+
+        <div class="form-group">
+            <label id="lang-slots"></label>
+            <div id="slot-container" class="selection-grid">
+                <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);"></p>
+            </div>
+        </div>
+
+        <input type="hidden" id="selectedServiceId" required>
+        <input type="hidden" id="selectedServiceDuration" required>
+        <input type="hidden" id="selectedSpecialistId" required>
+        <input type="hidden" id="selectedTimeSlot" required>
+
+        <button type="submit" id="lang-submit" disabled></button>
+    </form>
+
+    <div id="status"></div>
 </div>
 
 <script>
@@ -407,22 +452,20 @@ const CONFIG = {
     BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
     NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
 
-    features: {
-        showPrice: false,
-    },
+    features: { showPrice: false },
 
     strings: {
         en: {
-            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select a service and date to see times", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error fetching slots.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Find Next Available Slots", btnNextLoading: "Searching..."
+            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
+            btnNext: "Next 5 Available Slots", btnNextLoading: "Searching..."
         },
         de: {
-            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung wählen", specialist: "Spezialist wählen", date: "Datum wählen", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Termin buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine verfügbar.", statusError: "Fehler.", statusBooking: "Termin wird gebucht...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
-            btnNext: "Nächste freie Termine finden", btnNextLoading: "Suche..."
+            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
+            btnNext: "Nächste freie Termine", btnNextLoading: "Suche..."
         },
         sl: {
-            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Izberite storitev", specialist: "Izberite specialista", date: "Izberite datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum za prikaz terminov", submit: "Rezerviraj termin", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni prostih terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Najdi naslednje proste termine", btnNextLoading: "Iščem..."
+            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
+            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem..."
         }
     },
 
@@ -430,7 +473,7 @@ const CONFIG = {
         { id: "SVC_CALL", name: "30 min Call", duration: 30, price: 50 },
         { id: "SVC_STRATEGY", name: "60 min Strategy", duration: 60, price: 90 },
         { id: "SVC_PLANNING", name: "90 min Planning", duration: 90, price: 150 },
-        { id: "SVC_COLOR", name: "Full Color (2h, Split)", duration: 120, price: 180 } 
+        { id: "SVC_COLOR", name: "Full Color (2h)", duration: 120, price: 180 } 
     ],
 
     specialists: [
@@ -464,6 +507,9 @@ const clientLogoImg = document.getElementById('client-logo');
 const btnNextAvailable = document.getElementById('btn-next-available');
 const nextSlotsContainer = document.getElementById('next-slots-container');
 const langBtnNext = document.getElementById('lang-btn-next');
+const themeToggleBtn = document.getElementById('theme-toggle');
+const iconSun = document.getElementById('icon-sun');
+const iconMoon = document.getElementById('icon-moon');
 
 const selectedServiceId = document.getElementById('selectedServiceId');
 const selectedServiceDuration = document.getElementById('selectedServiceDuration');
@@ -490,340 +536,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     btnNextAvailable.addEventListener('click', fetchNextAvailableSlots);
     form.addEventListener('submit', handleFormSubmission);
+    themeToggleBtn.addEventListener('click', toggleTheme);
 });
 
-// --- RENDER FUNCTIONS ---
-
-function applyBranding() {
-    if (CONFIG.logoUrl) {
-        clientLogoImg.src = CONFIG.logoUrl;
-        bannerDiv.classList.remove('hidden');
-    }
-}
-
-function applyLanguage() {
-    document.getElementById('lang-title-tag').textContent = lang.title;
-    document.getElementById('lang-title').textContent = lang.title;
-    document.getElementById('lang-name').textContent = lang.name;
-    document.getElementById('lang-email').textContent = lang.email;
-    document.getElementById('lang-service').textContent = lang.service;
-    document.getElementById('lang-specialist').textContent = lang.specialist;
-    document.getElementById('lang-date').textContent = lang.date;
-    document.getElementById('lang-slots').textContent = lang.slots;
-    document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
-    submitBtn.textContent = lang.submit;
-    langBtnNext.textContent = lang.btnNext;
-}
-
-function renderCustomFields() {
-    CONFIG.customFields.forEach(field => {
-        const formGroup = document.createElement('div');
-        formGroup.className = 'form-group';
-        const label = document.createElement('label');
-        label.htmlFor = field.id;
-        label.textContent = field.labels[CONFIG.language];
-        if (field.required) label.classList.add('required');
-        const input = document.createElement('input');
-        input.type = field.type;
-        input.id = field.id;
-        input.name = field.id;
-        if (field.required) input.required = true;
-        formGroup.appendChild(label);
-        formGroup.appendChild(input);
-        customFieldsContainer.appendChild(formGroup);
-    });
-}
-
-function renderServices() {
-    serviceContainer.innerHTML = '';
-    CONFIG.services.forEach(service => {
-        const button = createSelectionButton(service.name, 'service-btn', { 
-            'data-duration': service.duration, 
-            'data-price': service.price,
-            'data-id': service.id 
-        });
-        button.addEventListener('click', () => {
-            handleSelection(button, serviceContainer, selectedServiceId, service.id);
-            selectedServiceDuration.value = service.duration; 
-            if (CONFIG.features.showPrice && service.price) {
-                priceDisplay.textContent = `${lang.pricePrefix}${service.price}${lang.priceSuffix}`;
-                priceDisplay.classList.remove('hidden');
-            } else {
-                priceDisplay.classList.add('hidden');
-            }
-            nextSlotsContainer.classList.add('hidden');
-            checkAvailability();
-        });
-        serviceContainer.appendChild(button);
-    });
-}
-
-function renderSpecialists() {
-    if (CONFIG.specialists.length === 0) {
-        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
-        specialistModule.classList.add('hidden');
-        return;
-    }
-    specialistModule.classList.remove('hidden');
-    CONFIG.specialists.forEach(specialist => {
-        const button = createSelectionButton(specialist.name, 'specialist-btn', { 'data-id': specialist.id });
-        button.addEventListener('click', () => {
-            handleSelection(button, specialistContainer, selectedSpecialistId, specialist.id);
-            nextSlotsContainer.classList.add('hidden');
-            checkAvailability();
-        });
-        specialistContainer.appendChild(button);
-    });
-}
-
-async function fetchNextAvailableSlots() {
-    if (!selectedServiceId.value) {
-        alert("Please select a service first.");
-        return;
-    }
-
-    const originalBtnText = langBtnNext.textContent;
-    langBtnNext.textContent = lang.btnNextLoading;
-    btnNextAvailable.disabled = true;
-    nextSlotsContainer.innerHTML = '';
-    nextSlotsContainer.classList.remove('hidden');
-
-    try {
-        const response = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (!response.ok) throw new Error("API Error");
-        const data = await response.json();
-        const allSlots = data.slots || []; 
-
-        const currentSpecId = selectedSpecialistId.value;
-        const serviceDuration = parseInt(selectedServiceDuration.value) || 30;
-
-        let filteredSlots = allSlots;
-        if (currentSpecId) {
-            filteredSlots = filteredSlots.filter(s => s.specialistId === currentSpecId);
-        }
-
-        const top5 = filteredSlots.slice(0, 5);
-
-        if (top5.length === 0) {
-            nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:14px; padding:10px;">${lang.statusNoSlots}</p>`;
-        } else {
-            top5.forEach(slot => {
-                const dateObj = new Date(slot.date);
-                const dayName = dateObj.toLocaleDateString(CONFIG.language, { weekday: 'long' });
-                const dateStr = dateObj.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'short' });
-                
-                const specObj = CONFIG.specialists.find(s => s.id === slot.specialistId);
-                const specName = specObj ? specObj.name : "Specialist";
-
-                const card = document.createElement('div');
-                card.className = 'next-slot-card';
-                card.innerHTML = `
-                    <div class="next-slot-info">
-                        <span class="slot-day-date">${dayName}, ${dateStr}</span>
-                        <span class="slot-specialist">${specName}</span>
-                    </div>
-                    <span class="slot-time-badge">${slot.startTime}</span>
-                `;
-
-                card.addEventListener('click', () => {
-                    dateInput.value = slot.date;
-                    
-                    if (!selectedSpecialistId.value || selectedSpecialistId.value !== slot.specialistId) {
-                        selectedSpecialistId.value = slot.specialistId;
-                        specialistContainer.querySelectorAll('.specialist-btn').forEach(btn => {
-                            if (btn.getAttribute('data-id') === slot.specialistId) {
-                                handleSelection(btn, specialistContainer, selectedSpecialistId, slot.specialistId);
-                            }
-                        });
-                    }
-                    nextSlotsContainer.classList.add('hidden');
-                    autoSelectTime(slot.startTime);
-                });
-
-                nextSlotsContainer.appendChild(card);
-            });
-        }
-
-    } catch (e) {
-        console.error(e);
-        nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:14px;">${lang.statusError}</p>`;
-    } finally {
-        langBtnNext.textContent = originalBtnText;
-        btnNextAvailable.disabled = false;
-    }
-}
-
-async function autoSelectTime(targetTime) {
-    await checkAvailability();
-    
-    // Slight delay to ensure DOM is rendered
-    setTimeout(() => {
-        const buttons = slotContainer.querySelectorAll('.slot-button');
-        let found = false;
-        buttons.forEach(btn => {
-            // Compare times (standardize format "09:00" vs "9:00")
-            const btnTime = btn.getAttribute('data-time').replace(/^0/, '');
-            const target = targetTime.replace(/^0/, '');
-            
-            if (btnTime === target) {
-                btn.click();
-                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                found = true;
-            }
-        });
-        if (!found) {
-            console.warn("Slot from 'Next 5' not found in real-time check. Might be taken.");
-        }
-    }, 100);
-}
-
-async function checkAvailability() {
-    const dateString = dateInput.value;
-    const workerId = selectedSpecialistId.value;
-    const serviceId = selectedServiceId.value; 
-    const duration = selectedServiceDuration.value;
-
-    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
-    selectedTimeSlot.value = '';
-    submitBtn.disabled = true;
-    statusDiv.textContent = '';
-    statusDiv.className = '';
-
-    if (!dateString || !workerId || !serviceId) {
-        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);">${lang.slotsPlaceholder}</p>`;
-        return;
-    }
-
-    try {
-        const response = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                dateString: dateString,
-                workerId: workerId,
-                serviceId: serviceId, 
-                duration: duration 
-            })
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const availableSlots = Array.isArray(data) ? data : data.slots;
-        renderSlotButtons(availableSlots);
-    } catch (error) {
-        console.error('Error fetching slots:', error);
-        statusDiv.className = 'error';
-        statusDiv.textContent = lang.statusError;
-        slotContainer.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
-    }
-}
-
-function renderSlotButtons(slots) {
-    slotContainer.innerHTML = '';
-    if (!slots || slots.length === 0) {
-        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
-        return;
-    }
-    slots.forEach(slotTime => {
-        const button = createSelectionButton(slotTime, 'slot-button', { 'data-time': slotTime });
-        button.addEventListener('click', () => {
-            handleSelection(button, slotContainer, selectedTimeSlot, slotTime);
-            submitBtn.disabled = false;
-        });
-        slotContainer.appendChild(button);
-    });
-}
-
-async function handleFormSubmission(e) {
-    e.preventDefault();
-    const serviceId = selectedServiceId.value;
-    const specialistId = selectedSpecialistId.value;
-    const timeSlot = selectedTimeSlot.value;
-    const date = dateInput.value;
-    const bookingStartTime = `${date}T${timeSlot}:00.000Z`;
-
-    const payload = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        bookingStartTime: bookingStartTime, 
-        serviceId: serviceId, 
-        specialistId: specialistId,
-        clientName: document.getElementById('name').value,
-        customData: {}
-    };
-    CONFIG.customFields.forEach(field => {
-        const input = document.getElementById(field.id);
-        if (input) payload.customData[field.id] = input.value;
-    });
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = lang.statusBooking;
-    statusDiv.textContent = lang.statusBooking;
-    statusDiv.className = '';
-
-    try {
-        const response = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const result = await response.json();
-        if (response.ok && result && result.status === 'success') {
-            statusDiv.className = 'success';
-            statusDiv.textContent = lang.statusSuccess;
-            form.reset();
-            clearAllSelections();
-            nextSlotsContainer.classList.add('hidden'); 
-        } else {
-            throw new Error(result.message || response.statusText);
-        }
-    } catch (error) {
-        statusDiv.className = 'error';
-        statusDiv.textContent = `${lang.statusFailed}${error.message}`;
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = lang.submit;
-    }
-}
-
-function createSelectionButton(text, className, dataAttributes) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = className + ' selection-btn';
-    button.textContent = text;
-    for (const key in dataAttributes) {
-        button.setAttribute(key, dataAttributes[key]);
-    }
-    return button;
-}
-
-function handleSelection(clickedButton, container, hiddenInput, value) {
-    container.querySelectorAll('.selection-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    clickedButton.classList.add('selected');
-    hiddenInput.value = value;
-}
-
-function clearAllSelections() {
-    document.querySelectorAll('.selection-btn.selected').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 20px 0; font-size: 14px; border: 1px dashed var(--support); border-radius: var(--radius-sm);">${lang.slotsPlaceholder}</p>`;
-    priceDisplay.classList.add('hidden');
-    selectedServiceId.value = ''; 
-    selectedServiceDuration.value = '';
-    if (CONFIG.specialists.length > 0) {
-        selectedSpecialistId.value = '';
-    } else {
-        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
-    }
-    selectedTimeSlot.value = '';
-    submitBtn.disabled = true;
-}
-</script>
-</body>
-</html>
+// --- DARK MODE TOGGLE ---
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    // Toggle Icons
+    if (document.body.classList.contains('dark-mode')) {
+        iconSun.classList.add('hidden');
+        iconMoon.classList.remove('hidden');
