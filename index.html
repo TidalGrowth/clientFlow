@@ -20,8 +20,10 @@
     --text-sub: #666666;
     
     --input-bg: #FFFFFF;
-    --pill-bg: #F5F5F7;       /* UNIFIED PILL BACKGROUND (Gray) */
-    --pill-hover: #EAEAEA;    /* Slightly darker gray on hover */
+    --pill-bg: #F5F5F7;       
+    --pill-hover: #EAEAEA;
+    
+    --next-week-border: #6C63FF; /* distinct color for next week days */
     
     --danger: #D32F2F;
     --success: #388E3C;
@@ -48,7 +50,8 @@ body.dark-mode {
     --input-bg: #2C2C2C;
     --pill-bg: #2C2C2C;       
     --pill-hover: #383838;
-    
+    --next-week-border: #8B85FF;
+
     --success: #66BB6A;
     --success-bg: rgba(102, 187, 106, 0.1);
 }
@@ -168,7 +171,7 @@ input:focus {
 }
 
 /* =========================================
-   4. UNIFIED BUTTONS (FIXED WIDTHS)
+   4. UNIFIED BUTTONS
    ========================================= */
 .selection-grid {
     display: grid;
@@ -176,18 +179,18 @@ input:focus {
     gap: 8px; 
 }
 
-/* FIX: Make Specialist container same width as Service container */
 #service-container.selection-grid,
 #specialist-container.selection-grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
 /* SHARED STYLES FOR ALL CLICKABLE PILLS */
-.selection-btn, .slot-button {
-    background-color: var(--secondary); /* FORCE GRAY BACKGROUND */
+.selection-btn, .slot-button, .quick-day-btn {
+    background-color: var(--pill-bg);
     border: 1px solid var(--support);
     border-radius: var(--radius-pill); 
-    padding: 8px 12px;                 
+    padding: 0 12px;                 
+    font-family: inherit;
     font-size: 13px;
     font-weight: 700;                  
     color: var(--primary);
@@ -195,20 +198,21 @@ input:focus {
     transition: var(--transition);
     text-align: center;
     box-sizing: border-box; 
-    height: 100%;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;                  
+    user-select: none; /* Prevent text selection on rapid clicks */
 }
 
-.selection-btn:hover, .slot-button:hover {
+.selection-btn:hover, .slot-button:hover, .quick-day-btn:hover {
     border-color: var(--accent);
     background-color: var(--pill-hover);
     transform: translateY(-1px);
 }
 
-.selection-btn.selected, .slot-button.selected {
+/* Selected State */
+.selection-btn.selected, .slot-button.selected, .quick-day-btn.selected {
     background-color: var(--accent);
     border-color: var(--accent);
     color: var(--accent-text);
@@ -216,12 +220,14 @@ input:focus {
     transform: translateY(0);
 }
 
+/* Disabled */
 .slot-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
 
+/* Price Display */
 #price-display {
     text-align: right;
     font-size: 13px;
@@ -231,7 +237,7 @@ input:focus {
 }
 
 /* =========================================
-   5. NEXT 5 SLOTS CARDS
+   5. NEXT 5 SLOTS (COMPACT CARDS)
    ========================================= */
 #next-slots-wrapper { margin-bottom: 16px; }
 
@@ -267,7 +273,8 @@ input:focus {
     background-color: var(--surface);
     border: 1px solid var(--support);
     border-radius: 12px;
-    padding: 12px 16px;
+    /* COMPACT PADDING */
+    padding: 8px 12px;
     cursor: pointer;
     transition: var(--transition);
     display: flex;
@@ -280,24 +287,58 @@ input:focus {
     transform: translateX(4px);
 }
 
-.slot-day-date { font-weight: 700; font-size: 14px; color: var(--primary); }
-.slot-specialist { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+.next-slot-info { display: flex; flex-direction: column; }
 
-/* IDENTICAL BADGE STYLING */
+.slot-day-date { font-weight: 700; font-size: 13px; color: var(--primary); }
+.slot-specialist { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
+
+/* MATCHING BADGE STYLING */
 .slot-time-badge {
-    background-color: var(--secondary); /* Matches .slot-button */
+    background-color: var(--pill-bg); 
     color: var(--primary);
-    padding: 8px 12px; /* Matches .slot-button padding */
+    /* EXACT MATCH to .slot-button dimensions */
+    padding: 0 12px; 
     border-radius: var(--radius-pill);
+    font-family: inherit;
     font-weight: 700; 
     font-size: 13px;
     border: 1px solid var(--support);
-    min-width: 60px; /* Ensure minimum width matches */
-    text-align: center;
+    min-width: 60px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* =========================================
-   6. WAITLIST LINK & MODAL
+   6. QUICK DAY SELECTOR
+   ========================================= */
+#quick-days-wrapper {
+    margin-bottom: 12px;
+}
+#quick-days-container {
+    display: grid;
+    /* Flexible grid to fit single row */
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+    gap: 6px;
+}
+.quick-day-btn.next-week {
+    border-color: var(--support);
+    border-style: dashed; /* Distinct visual for next week */
+    color: var(--text-sub);
+}
+.quick-day-btn.next-week:hover {
+    border-color: var(--accent);
+    border-style: solid;
+    color: var(--primary);
+}
+.quick-day-btn.next-week.selected {
+    border-style: solid;
+    color: var(--accent-text);
+}
+
+/* =========================================
+   7. WAITLIST & MODAL
    ========================================= */
 #waitlist-trigger {
     text-align: center;
@@ -338,9 +379,7 @@ input:focus {
     transform: translateY(20px);
     transition: transform 0.3s;
 }
-.modal-overlay.active .modal-card {
-    transform: translateY(0);
-}
+.modal-overlay.active .modal-card { transform: translateY(0); }
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -351,7 +390,7 @@ input:focus {
 .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-sub); }
 
 /* =========================================
-   7. SUBMIT & STATUS
+   8. SUBMIT & STATUS
    ========================================= */
 button[type="submit"], #waitlist-submit {
     width: 100%;
@@ -433,7 +472,12 @@ button[type="submit"]:disabled {
         </div>
 
         <div class="form-group">
-            <label for="date" id="lang-date" class="required"></label>
+            <label id="lang-date" class="required"></label>
+            
+            <div id="quick-days-wrapper">
+                <div id="quick-days-container"></div>
+            </div>
+
             <input type="date" id="date" required>
         </div>
 
@@ -473,7 +517,7 @@ button[type="submit"]:disabled {
         <form id="waitlistForm">
             <div class="form-group">
                 <label class="required">Preferred Date Range</label>
-                <input type="text" id="waitlist-range" placeholder="e.g. Next week, any morning" required>
+                <input type="text" id="waitlist-range" name="range" placeholder="e.g. Next week, any morning" required>
             </div>
             <button type="submit" id="waitlist-submit">Join Waitlist</button>
         </form>
@@ -484,23 +528,34 @@ button[type="submit"]:disabled {
 const CONFIG = {
     language: 'en',
     logoUrl: 'https://files.catbox.moe/jcjk1q.png',
+    
     SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
     BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
     NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
+    WAITLIST_WEBHOOK: "https://n8n.tidal-growth.com/webhook/join-waitlist",
     
     features: { showPrice: false },
+    // CONFIG: Which days are working days? (1=Mon, 5=Fri)
+    workingDays: [1, 2, 3, 4, 5],
+
     strings: {
         en: {
             title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Next 5 Available Slots", btnNextLoading: "Searching..."
+            btnNext: "Next 5 Available Slots", btnNextLoading: "Searching...",
+            dayNames: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+            waitlistSuccess: "Added to waitlist!"
         },
         de: {
             title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
-            btnNext: "Nächste freie Termine", btnNextLoading: "Suche..."
+            btnNext: "Nächste freie Termine", btnNextLoading: "Suche...",
+            dayNames: ["SO", "MO", "DI", "MI", "DO", "FR", "SA"],
+            waitlistSuccess: "Zur Warteliste hinzugefügt!"
         },
         sl: {
             title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem..."
+            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem...",
+            dayNames: ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"],
+            waitlistSuccess: "Dodano na čakalno listo!"
         }
     },
     services: [
@@ -540,11 +595,15 @@ const els = {
     themeToggle: document.getElementById('theme-toggle'),
     sun: document.getElementById('icon-sun'),
     moon: document.getElementById('icon-moon'),
+    quickDays: document.getElementById('quick-days-container'),
+    
+    // Waitlist
     waitlistTrigger: document.getElementById('waitlist-trigger'),
     openWaitlist: document.getElementById('open-waitlist'),
     waitlistModal: document.getElementById('waitlist-modal'),
     closeWaitlist: document.getElementById('close-waitlist'),
     waitlistForm: document.getElementById('waitlistForm'),
+    waitlistRange: document.getElementById('waitlist-range'),
     
     svcId: document.getElementById('selectedServiceId'),
     svcDur: document.getElementById('selectedServiceDuration'),
@@ -558,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCustomFields();
     renderServices();
     renderSpecialists();
+    renderQuickDays(); // New Function
 
     const today = new Date();
     els.date.min = today.toISOString().split('T')[0];
@@ -565,6 +625,8 @@ document.addEventListener('DOMContentLoaded', () => {
     els.date.addEventListener('change', () => {
         els.nextContainer.classList.add('hidden');
         els.nextContainer.innerHTML = '';
+        // Reset quick day buttons if manual date picked
+        els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
         checkAvailability();
     });
     
@@ -572,13 +634,10 @@ document.addEventListener('DOMContentLoaded', () => {
     els.form.addEventListener('submit', handleFormSubmission);
     els.themeToggle.addEventListener('click', toggleTheme);
     
+    // Waitlist Logic
     els.openWaitlist.addEventListener('click', () => els.waitlistModal.classList.add('active'));
     els.closeWaitlist.addEventListener('click', () => els.waitlistModal.classList.remove('active'));
-    els.waitlistForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        alert("Waitlist logic will be connected in the next step.");
-        els.waitlistModal.classList.remove('active');
-    });
+    els.waitlistForm.addEventListener('submit', handleWaitlistSubmission);
 });
 
 function toggleTheme() {
@@ -646,11 +705,59 @@ function renderSpecialists() {
     CONFIG.specialists.forEach(spec => {
         const btn = createBtn(spec.name, 'specialist-btn', { 'data-id': spec.id });
         btn.addEventListener('click', () => {
-            handleSelection(btn, els.specialists, els.specId, spec.id);
+            // TOGGLE LOGIC: If clicking selected, unselect it
+            if (btn.classList.contains('selected')) {
+                btn.classList.remove('selected');
+                els.specId.value = ''; // Clear ID
+            } else {
+                handleSelection(btn, els.specialists, els.specId, spec.id);
+            }
             els.nextContainer.classList.add('hidden');
             checkAvailability();
         });
         els.specialists.appendChild(btn);
+    });
+}
+
+// --- NEW: QUICK DAY SELECTOR ---
+function renderQuickDays() {
+    els.quickDays.innerHTML = '';
+    const today = new Date();
+    const currentDayIdx = today.getDay(); // 0=Sun, 1=Mon
+
+    CONFIG.workingDays.forEach(targetIdx => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-day-btn';
+        
+        // Calculate Date
+        const targetDate = new Date(today);
+        if (targetIdx < currentDayIdx || (targetIdx === currentDayIdx && today.getHours() >= 17)) {
+            // Day passed or too late today -> Next week
+            const diff = targetIdx - currentDayIdx + 7;
+            targetDate.setDate(today.getDate() + diff);
+            btn.classList.add('next-week'); // Visual cue
+        } else {
+            // Upcoming this week
+            const diff = targetIdx - currentDayIdx;
+            targetDate.setDate(today.getDate() + diff);
+        }
+
+        const isoDate = targetDate.toISOString().split('T')[0];
+        btn.textContent = lang.dayNames[targetIdx]; // Use Translations
+        
+        btn.addEventListener('click', () => {
+            // Visual Selection
+            els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            
+            // Logic
+            els.date.value = isoDate;
+            els.nextContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        
+        els.quickDays.appendChild(btn);
     });
 }
 
@@ -687,7 +794,7 @@ async function fetchNextAvailableSlots() {
                         <span class="slot-day-date">${day}, ${dateStr}</span>
                         <span class="slot-specialist">${specName}</span>
                     </div>
-                    <span class="slot-time-badge">${slot.startTime.padStart(5, '0')}</span>
+                    <span class="slot-time-badge">${slot.startTime.toString().padStart(5, '0')}</span>
                 `;
                 card.addEventListener('click', () => {
                     els.date.value = slot.date;
@@ -738,16 +845,20 @@ async function checkAvailability() {
     els.submit.disabled = true;
     els.waitlistTrigger.classList.add('hidden');
 
-    if (!date || !worker || !svc) {
+    if (!date || !svc) {
         els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
         return;
     }
+
+    // If no specialist selected (Optional mode), pick default for checking OR handle in n8n
+    // For this app, we need a workerId to check slots. If "Any", use default or first.
+    const checkWorker = worker || CONFIG.defaultSpecialistId;
 
     try {
         const res = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dateString: date, workerId: worker, serviceId: svc, duration: dur })
+            body: JSON.stringify({ dateString: date, workerId: checkWorker, serviceId: svc, duration: dur })
         });
         if (!res.ok) throw new Error();
         const data = await res.json();
@@ -784,7 +895,7 @@ async function handleFormSubmission(e) {
         email: document.getElementById('email').value,
         bookingStartTime: `${els.date.value}T${els.time.value}:00.000Z`,
         serviceId: els.svcId.value,
-        specialistId: els.specId.value,
+        specialistId: els.specId.value || CONFIG.defaultSpecialistId,
         clientName: document.getElementById('name').value,
         customData: {}
     };
@@ -816,6 +927,42 @@ async function handleFormSubmission(e) {
     }
 }
 
+// --- WAITLIST SUBMISSION ---
+async function handleWaitlistSubmission(e) {
+    e.preventDefault();
+    const btn = document.getElementById('waitlist-submit');
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    
+    const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone') ? document.getElementById('phone').value : "",
+        range: document.getElementById('waitlist-range').value,
+        serviceId: els.svcId.value,
+        specialistId: els.specId.value
+    };
+
+    try {
+        const res = await fetch(CONFIG.WAITLIST_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            alert(lang.waitlistSuccess);
+            els.waitlistModal.classList.remove('active');
+        } else {
+            alert(lang.statusError);
+        }
+    } catch (err) {
+        alert(lang.statusError);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Join Waitlist";
+    }
+}
+
 function createBtn(txt, cls, attrs) {
     const b = document.createElement('button');
     b.type = 'button';
@@ -838,6 +985,8 @@ function clearAll() {
     els.svcId.value = ''; els.svcDur.value = ''; els.time.value = '';
     els.specId.value = CONFIG.specialists.length ? '' : CONFIG.defaultSpecialistId;
     els.submit.disabled = true;
+    // Reset Quick Days
+    if (els.quickDays) els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
 }
 </script>
 </body>
