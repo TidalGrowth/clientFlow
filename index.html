@@ -20,7 +20,7 @@
     --text-sub: #666666;
     
     --input-bg: #FFFFFF;
-    --pill-bg: #F5F5F7;       /* UNIFIED PILL BACKGROUND */
+    --pill-bg: #F5F5F7;       /* UNIFIED PILL BACKGROUND (Gray) */
     --pill-hover: #EAEAEA;    /* Slightly darker gray on hover */
     
     --danger: #D32F2F;
@@ -28,7 +28,7 @@
     --success-bg: #EDF7ED;
     
     /* Spacing & Shape */
-    --radius-input: 8px;
+    --radius-input: 8px;      
     --radius-pill: 50px;      /* Full Pill */
     --radius-card: 16px;
     --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
@@ -46,7 +46,7 @@ body.dark-mode {
     --text-sub: #AAAAAA;
     
     --input-bg: #2C2C2C;
-    --pill-bg: #2C2C2C;       /* Dark pills */
+    --pill-bg: #2C2C2C;       
     --pill-hover: #383838;
     
     --success: #66BB6A;
@@ -168,26 +168,28 @@ input:focus {
 }
 
 /* =========================================
-   4. UNIFIED BUTTONS (THE FIX)
+   4. UNIFIED BUTTONS (FIXED WIDTHS)
    ========================================= */
 .selection-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); /* Tighter columns */
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
     gap: 8px; 
 }
 
-#service-container.selection-grid {
+/* FIX: Make Specialist container same width as Service container */
+#service-container.selection-grid,
+#specialist-container.selection-grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
 /* SHARED STYLES FOR ALL CLICKABLE PILLS */
 .selection-btn, .slot-button {
-    background-color: var(--pill-bg);  /* MATCHES NEXT 5 BADGE */
+    background-color: var(--secondary); /* FORCE GRAY BACKGROUND */
     border: 1px solid var(--support);
     border-radius: var(--radius-pill); 
-    padding: 8px 12px;                 /* MATCHES NEXT 5 BADGE PADDING */
+    padding: 8px 12px;                 
     font-size: 13px;
-    font-weight: 700;                  /* MATCHES NEXT 5 BOLDNESS */
+    font-weight: 700;                  
     color: var(--primary);
     cursor: pointer;
     transition: var(--transition);
@@ -197,7 +199,7 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 36px;                  /* SLEEKER HEIGHT */
+    min-height: 36px;                  
 }
 
 .selection-btn:hover, .slot-button:hover {
@@ -281,15 +283,17 @@ input:focus {
 .slot-day-date { font-weight: 700; font-size: 14px; color: var(--primary); }
 .slot-specialist { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
 
-/* This matches the buttons above now */
+/* IDENTICAL BADGE STYLING */
 .slot-time-badge {
-    background-color: var(--pill-bg); 
+    background-color: var(--secondary); /* Matches .slot-button */
     color: var(--primary);
-    padding: 8px 16px; 
+    padding: 8px 12px; /* Matches .slot-button padding */
     border-radius: var(--radius-pill);
     font-weight: 700; 
     font-size: 13px;
     border: 1px solid var(--support);
+    min-width: 60px; /* Ensure minimum width matches */
+    text-align: center;
 }
 
 /* =========================================
@@ -308,7 +312,6 @@ input:focus {
 }
 #waitlist-trigger a:hover { text-decoration: underline; }
 
-/* Modal Styling */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -344,7 +347,7 @@ input:focus {
     align-items: center;
     margin-bottom: 20px;
 }
-.modal-header h3 { margin: 0; font-size: 18px; }
+.modal-header h3 { margin: 0; font-size: 18px; color: var(--primary); }
 .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-sub); }
 
 /* =========================================
@@ -484,7 +487,6 @@ const CONFIG = {
     SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
     BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
     NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
-    // TODO: Add Waitlist Webhook later
     
     features: { showPrice: false },
     strings: {
@@ -519,7 +521,6 @@ const CONFIG = {
 };
 
 const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
-// Global Elements
 const els = {
     customFields: document.getElementById('custom-fields-container'),
     services: document.getElementById('service-container'),
@@ -545,7 +546,6 @@ const els = {
     closeWaitlist: document.getElementById('close-waitlist'),
     waitlistForm: document.getElementById('waitlistForm'),
     
-    // Hidden Inputs
     svcId: document.getElementById('selectedServiceId'),
     svcDur: document.getElementById('selectedServiceDuration'),
     specId: document.getElementById('selectedSpecialistId'),
@@ -572,12 +572,11 @@ document.addEventListener('DOMContentLoaded', () => {
     els.form.addEventListener('submit', handleFormSubmission);
     els.themeToggle.addEventListener('click', toggleTheme);
     
-    // Waitlist Handlers
     els.openWaitlist.addEventListener('click', () => els.waitlistModal.classList.add('active'));
     els.closeWaitlist.addEventListener('click', () => els.waitlistModal.classList.remove('active'));
     els.waitlistForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        alert("Waitlist logic to be connected to n8n in next step!");
+        alert("Waitlist logic will be connected in the next step.");
         els.waitlistModal.classList.remove('active');
     });
 });
@@ -688,7 +687,7 @@ async function fetchNextAvailableSlots() {
                         <span class="slot-day-date">${day}, ${dateStr}</span>
                         <span class="slot-specialist">${specName}</span>
                     </div>
-                    <span class="slot-time-badge">${slot.startTime}</span>
+                    <span class="slot-time-badge">${slot.startTime.padStart(5, '0')}</span>
                 `;
                 card.addEventListener('click', () => {
                     els.date.value = slot.date;
