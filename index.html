@@ -6,46 +6,49 @@
 <title id="lang-title-tag"></title>
 <style>
 /* =========================================
-   1. DESIGN SYSTEM & VARIABLES (THEMING)
+   1. DESIGN SYSTEM & VARIABLES
    ========================================= */
 :root {
-    /* --- LIGHT THEME (Default) --- */
+    /* --- LIGHT THEME --- */
     --primary: #1A1A1A;       /* Jet Black */
-    --secondary: #F5F5F7;     /* Cultured White (Background) */
-    --surface: #FFFFFF;       /* Pure White (Card) */
+    --secondary: #F5F5F7;     /* Cultured White (Backgrounds & PILLS) */
+    --surface: #FFFFFF;       /* Pure White (Cards) */
     --accent: #2962FF;        /* Royal Blue */
     --accent-hover: #1e4bd1;
     --accent-text: #FFFFFF;
     --support: #E0E0E0;       /* Borders */
     --text-sub: #666666;
+    
     --input-bg: #FFFFFF;
-    --slot-bg: #FFFFFF;       /* White for slots */
-    --slot-hover: rgba(41, 98, 255, 0.04);
+    --pill-bg: #F5F5F7;       /* UNIFIED PILL BACKGROUND */
+    --pill-hover: #EAEAEA;    /* Slightly darker gray on hover */
+    
     --danger: #D32F2F;
     --success: #388E3C;
     --success-bg: #EDF7ED;
     
     /* Spacing & Shape */
-    --radius-input: 8px;      /* Slightly boxy for inputs */
-    --radius-pill: 50px;      /* FULL PILL for buttons */
-    --radius-card: 16px;      /* Smooth corners for container */
+    --radius-input: 8px;
+    --radius-pill: 50px;      /* Full Pill */
+    --radius-card: 16px;
     --shadow-card: 0 4px 20px rgba(0,0,0,0.08);
     --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* --- DARK THEME OVERRIDES --- */
+/* --- DARK THEME --- */
 body.dark-mode {
-    --primary: #EAEAEA;       /* Off-White text */
-    --secondary: #121212;     /* Deep Black Background */
-    --surface: #1E1E1E;       /* Dark Grey Card */
-    --accent: #5381FF;        /* Lighter Blue for contrast */
-    --accent-hover: #739aff;
+    --primary: #EAEAEA;
+    --secondary: #121212;
+    --surface: #1E1E1E;
+    --accent: #5381FF;
     --accent-text: #FFFFFF;
-    --support: #333333;       /* Dark Borders */
+    --support: #333333;
     --text-sub: #AAAAAA;
+    
     --input-bg: #2C2C2C;
-    --slot-bg: #2C2C2C;
-    --slot-hover: rgba(83, 129, 255, 0.15);
+    --pill-bg: #2C2C2C;       /* Dark pills */
+    --pill-hover: #383838;
+    
     --success: #66BB6A;
     --success-bg: rgba(102, 187, 106, 0.1);
 }
@@ -65,7 +68,7 @@ body {
 }
 
 /* =========================================
-   2. LAYOUT & CONTAINERS
+   2. LAYOUT
    ========================================= */
 #banner {
     width: 100%;
@@ -77,7 +80,6 @@ body {
     border-top-right-radius: var(--radius-card);
     border-bottom: 1px solid var(--support);
     margin-bottom: 0;
-    transition: background-color 0.3s ease;
 }
 
 #banner img {
@@ -96,7 +98,8 @@ body {
     box-shadow: var(--shadow-card);
     width: 100%;
     max-width: 450px;
-    transition: background-color 0.3s ease, border-radius 0.3s;
+    transition: background-color 0.3s ease;
+    position: relative;
 }
 
 #banner:not(.hidden) + .container {
@@ -104,7 +107,6 @@ body {
     border-top-right-radius: 0;
 }
 
-/* --- Header Row (Title + Dark Mode Toggle) --- */
 .header-row {
     display: flex;
     justify-content: space-between;
@@ -128,21 +130,15 @@ h2 {
     padding: 8px;
     border-radius: 50%;
     color: var(--primary);
-    transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: center;
-}
-.theme-toggle:hover {
-    background-color: var(--support);
 }
 
 /* =========================================
    3. FORM ELEMENTS
    ========================================= */
-.form-group {
-    margin-bottom: 12px;
-}
+.form-group { margin-bottom: 12px; }
 
 label {
     display: block;
@@ -151,16 +147,9 @@ label {
     font-weight: 600;
     font-size: 13px;
 }
+label.required::after { content: " *"; color: var(--accent); }
 
-label.required::after {
-    content: " *";
-    color: var(--accent);
-}
-
-input[type="text"], 
-input[type="email"], 
-input[type="tel"], 
-input[type="date"] {
+input {
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--support);
@@ -172,7 +161,6 @@ input[type="date"] {
     color: var(--primary);
     transition: var(--transition);
 }
-
 input:focus {
     border-color: var(--accent);
     outline: none;
@@ -180,11 +168,11 @@ input:focus {
 }
 
 /* =========================================
-   4. BUTTONS & PILL SHAPES (UNIFIED)
+   4. UNIFIED BUTTONS (THE FIX)
    ========================================= */
 .selection-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); /* Tighter columns */
     gap: 8px; 
 }
 
@@ -192,14 +180,14 @@ input:focus {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
+/* SHARED STYLES FOR ALL CLICKABLE PILLS */
 .selection-btn, .slot-button {
-    background-color: var(--slot-bg);
+    background-color: var(--pill-bg);  /* MATCHES NEXT 5 BADGE */
     border: 1px solid var(--support);
     border-radius: var(--radius-pill); 
-    padding: 8px 16px;
-    font-size: 14px;
-    /* UPDATED: Made bold to match the Next 5 style */
-    font-weight: 600; 
+    padding: 8px 12px;                 /* MATCHES NEXT 5 BADGE PADDING */
+    font-size: 13px;
+    font-weight: 700;                  /* MATCHES NEXT 5 BOLDNESS */
     color: var(--primary);
     cursor: pointer;
     transition: var(--transition);
@@ -209,12 +197,12 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
+    min-height: 36px;                  /* SLEEKER HEIGHT */
 }
 
 .selection-btn:hover, .slot-button:hover {
     border-color: var(--accent);
-    background-color: var(--slot-hover);
+    background-color: var(--pill-hover);
     transform: translateY(-1px);
 }
 
@@ -223,7 +211,6 @@ input:focus {
     border-color: var(--accent);
     color: var(--accent-text);
     box-shadow: 0 4px 12px rgba(41, 98, 255, 0.25);
-    font-weight: 600;
     transform: translateY(0);
 }
 
@@ -242,11 +229,9 @@ input:focus {
 }
 
 /* =========================================
-   5. NEXT 5 SLOTS (Card Design)
+   5. NEXT 5 SLOTS CARDS
    ========================================= */
-#next-slots-wrapper {
-    margin-bottom: 16px;
-}
+#next-slots-wrapper { margin-bottom: 16px; }
 
 #btn-next-available {
     width: 100%;
@@ -264,9 +249,8 @@ input:focus {
     justify-content: center;
     gap: 8px;
 }
-
 #btn-next-available:hover {
-    background-color: var(--slot-hover);
+    background-color: var(--pill-hover);
     border-style: solid;
 }
 
@@ -288,47 +272,85 @@ input:focus {
     justify-content: space-between;
     align-items: center;
 }
-
 .next-slot-card:hover {
     border-color: var(--accent);
-    background-color: var(--slot-hover);
+    background-color: var(--pill-hover);
     transform: translateX(4px);
 }
 
-.next-slot-info {
-    display: flex;
-    flex-direction: column;
-}
+.slot-day-date { font-weight: 700; font-size: 14px; color: var(--primary); }
+.slot-specialist { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
 
-.slot-day-date {
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 14px;
-}
-
-.slot-specialist {
-    font-size: 12px;
-    color: var(--text-sub);
-    margin-top: 2px;
-}
-
-/* UPDATED: BADGE STYLING TO MATCH SLOT BUTTONS */
+/* This matches the buttons above now */
 .slot-time-badge {
-    background-color: var(--slot-bg); /* Was secondary, now matches button bg */
+    background-color: var(--pill-bg); 
     color: var(--primary);
-    padding: 8px 16px; /* Slightly wider padding */
+    padding: 8px 16px; 
     border-radius: var(--radius-pill);
-    font-weight: 600; /* Bold */
-    font-size: 14px;
-    border: 1px solid var(--support); /* Consistent Border */
-    min-width: 60px; /* Ensure minimum width like buttons */
-    text-align: center;
+    font-weight: 700; 
+    font-size: 13px;
+    border: 1px solid var(--support);
 }
 
 /* =========================================
-   6. SUBMIT & STATUS
+   6. WAITLIST LINK & MODAL
    ========================================= */
-button[type="submit"] {
+#waitlist-trigger {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 13px;
+}
+#waitlist-trigger a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+#waitlist-trigger a:hover { text-decoration: underline; }
+
+/* Modal Styling */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+.modal-card {
+    background: var(--surface);
+    padding: 24px;
+    border-radius: var(--radius-card);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+.modal-overlay.active .modal-card {
+    transform: translateY(0);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.modal-header h3 { margin: 0; font-size: 18px; }
+.close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-sub); }
+
+/* =========================================
+   7. SUBMIT & STATUS
+   ========================================= */
+button[type="submit"], #waitlist-submit {
     width: 100%;
     padding: 14px;
     background-color: var(--accent);
@@ -342,19 +364,11 @@ button[type="submit"] {
     transition: var(--transition);
     box-shadow: 0 4px 10px rgba(41, 98, 255, 0.2);
 }
-
-button[type="submit"]:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(41, 98, 255, 0.3);
-}
-
 button[type="submit"]:disabled {
     background-color: var(--support);
     color: var(--text-sub);
     cursor: not-allowed;
     box-shadow: none;
-    transform: none;
 }
 
 #status {
@@ -380,7 +394,7 @@ button[type="submit"]:disabled {
 <div class="container">
     <div class="header-row">
         <h2 id="lang-title"></h2>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Dark Mode">
+        <button class="theme-toggle" id="theme-toggle">
             <span id="icon-sun">☀️</span>
             <span id="icon-moon" class="hidden">🌙</span>
         </button>
@@ -395,7 +409,6 @@ button[type="submit"]:disabled {
             <label for="email" id="lang-email"></label>
             <input type="email" id="email" placeholder="Optional">
         </div>
-
         <div id="custom-fields-container"></div>
 
         <div class="form-group" id="service-module">
@@ -426,6 +439,12 @@ button[type="submit"]:disabled {
             <div id="slot-container" class="selection-grid">
                 <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);"></p>
             </div>
+            
+            <div id="waitlist-trigger" class="hidden">
+                <p style="margin:0; color:var(--text-sub);">
+                    Can't find a time? <a id="open-waitlist">Join the Waitlist</a>
+                </p>
+            </div>
         </div>
 
         <input type="hidden" id="selectedServiceId" required>
@@ -439,25 +458,39 @@ button[type="submit"]:disabled {
     <div id="status"></div>
 </div>
 
+<div class="modal-overlay" id="waitlist-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Join Waitlist</h3>
+            <button class="close-modal" id="close-waitlist">×</button>
+        </div>
+        <p style="font-size:13px; color:var(--text-sub); margin-bottom:15px;">
+            If a slot becomes available, we will email you.
+        </p>
+        <form id="waitlistForm">
+            <div class="form-group">
+                <label class="required">Preferred Date Range</label>
+                <input type="text" id="waitlist-range" placeholder="e.g. Next week, any morning" required>
+            </div>
+            <button type="submit" id="waitlist-submit">Join Waitlist</button>
+        </form>
+    </div>
+</div>
+
 <script>
-// ======================================================================
-// --- 1. CONFIGURATION ---
-// ======================================================================
 const CONFIG = {
     language: 'en',
     logoUrl: 'https://files.catbox.moe/jcjk1q.png',
-    
-    // --- Webhook URLs ---
     SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
     BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
     NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
-
+    // TODO: Add Waitlist Webhook later
+    
     features: { showPrice: false },
-
     strings: {
         en: {
             title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Find Next Available Slots", btnNextLoading: "Searching..."
+            btnNext: "Next 5 Available Slots", btnNextLoading: "Searching..."
         },
         de: {
             title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
@@ -465,58 +498,60 @@ const CONFIG = {
         },
         sl: {
             title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Najdi naslednje proste termine", btnNextLoading: "Iščem..."
+            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem..."
         }
     },
-
     services: [
         { id: "SVC_CALL", name: "30 min Call", duration: 30, price: 50 },
         { id: "SVC_STRATEGY", name: "60 min Strategy", duration: 60, price: 90 },
         { id: "SVC_PLANNING", name: "90 min Planning", duration: 90, price: 150 },
         { id: "SVC_COLOR", name: "Full Color (2h)", duration: 120, price: 180 } 
     ],
-
     specialists: [
         { name: "Specialist A", id: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com" },
         { name: "Specialist B", id: "c_fe27362b4a113006914e848ceba9d7758c4d4dc1f55d67e7084dc90355e5b499@group.calendar.google.com" }
     ],
     defaultSpecialistId: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com",
-
     customFields: [
         { id: "phone", type: "tel", required: false, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
         { id: "goal", type: "text", required: false, labels: { en: "Comment", de: "Kommentar", sl: "Opomba" } }
     ]
 };
 
-// ======================================================================
-
 const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
-const customFieldsContainer = document.getElementById('custom-fields-container');
-const serviceContainer = document.getElementById('service-container');
-const specialistContainer = document.getElementById('specialist-container');
-const specialistModule = document.getElementById('specialist-module');
-const dateInput = document.getElementById('date');
-const slotContainer = document.getElementById('slot-container');
-const priceDisplay = document.getElementById('price-display');
-const submitBtn = document.getElementById('lang-submit');
-const statusDiv = document.getElementById('status');
-const form = document.getElementById('bookingForm');
-const bannerDiv = document.getElementById('banner');
-const clientLogoImg = document.getElementById('client-logo');
+// Global Elements
+const els = {
+    customFields: document.getElementById('custom-fields-container'),
+    services: document.getElementById('service-container'),
+    specialists: document.getElementById('specialist-container'),
+    specModule: document.getElementById('specialist-module'),
+    date: document.getElementById('date'),
+    slots: document.getElementById('slot-container'),
+    price: document.getElementById('price-display'),
+    submit: document.getElementById('lang-submit'),
+    status: document.getElementById('status'),
+    form: document.getElementById('bookingForm'),
+    banner: document.getElementById('banner'),
+    logo: document.getElementById('client-logo'),
+    btnNext: document.getElementById('btn-next-available'),
+    nextContainer: document.getElementById('next-slots-container'),
+    langBtnNext: document.getElementById('lang-btn-next'),
+    themeToggle: document.getElementById('theme-toggle'),
+    sun: document.getElementById('icon-sun'),
+    moon: document.getElementById('icon-moon'),
+    waitlistTrigger: document.getElementById('waitlist-trigger'),
+    openWaitlist: document.getElementById('open-waitlist'),
+    waitlistModal: document.getElementById('waitlist-modal'),
+    closeWaitlist: document.getElementById('close-waitlist'),
+    waitlistForm: document.getElementById('waitlistForm'),
+    
+    // Hidden Inputs
+    svcId: document.getElementById('selectedServiceId'),
+    svcDur: document.getElementById('selectedServiceDuration'),
+    specId: document.getElementById('selectedSpecialistId'),
+    time: document.getElementById('selectedTimeSlot')
+};
 
-const btnNextAvailable = document.getElementById('btn-next-available');
-const nextSlotsContainer = document.getElementById('next-slots-container');
-const langBtnNext = document.getElementById('lang-btn-next');
-const themeToggleBtn = document.getElementById('theme-toggle');
-const iconSun = document.getElementById('icon-sun');
-const iconMoon = document.getElementById('icon-moon');
-
-const selectedServiceId = document.getElementById('selectedServiceId');
-const selectedServiceDuration = document.getElementById('selectedServiceDuration');
-const selectedSpecialistId = document.getElementById('selectedSpecialistId');
-const selectedTimeSlot = document.getElementById('selectedTimeSlot');
-
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     applyBranding();
     applyLanguage();
@@ -525,47 +560,43 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSpecialists();
 
     const today = new Date();
-    today.setDate(today.getDate());
-    dateInput.min = today.toISOString().split('T')[0];
+    els.date.min = today.toISOString().split('T')[0];
 
-    dateInput.addEventListener('change', () => {
-        nextSlotsContainer.classList.add('hidden');
-        nextSlotsContainer.innerHTML = '';
+    els.date.addEventListener('change', () => {
+        els.nextContainer.classList.add('hidden');
+        els.nextContainer.innerHTML = '';
         checkAvailability();
     });
     
-    btnNextAvailable.addEventListener('click', fetchNextAvailableSlots);
-    form.addEventListener('submit', handleFormSubmission);
-    themeToggleBtn.addEventListener('click', toggleTheme);
+    els.btnNext.addEventListener('click', fetchNextAvailableSlots);
+    els.form.addEventListener('submit', handleFormSubmission);
+    els.themeToggle.addEventListener('click', toggleTheme);
+    
+    // Waitlist Handlers
+    els.openWaitlist.addEventListener('click', () => els.waitlistModal.classList.add('active'));
+    els.closeWaitlist.addEventListener('click', () => els.waitlistModal.classList.remove('active'));
+    els.waitlistForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert("Waitlist logic to be connected to n8n in next step!");
+        els.waitlistModal.classList.remove('active');
+    });
 });
 
-// --- DARK MODE TOGGLE ---
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
-    if (document.body.classList.contains('dark-mode')) {
-        iconSun.classList.add('hidden');
-        iconMoon.classList.remove('hidden');
-        iconMoon.textContent = '☀️'; 
-    } else {
-        iconSun.classList.remove('hidden');
-        iconMoon.classList.add('hidden');
-        iconSun.textContent = '🌙'; 
-    }
+    const isDark = document.body.classList.contains('dark-mode');
+    els.sun.classList.toggle('hidden', isDark);
+    els.moon.classList.toggle('hidden', !isDark);
 }
-// Init icon state
-iconSun.textContent = '🌙';
-
-// --- RENDER FUNCTIONS ---
 
 function applyBranding() {
     if (CONFIG.logoUrl) {
-        clientLogoImg.src = CONFIG.logoUrl;
-        bannerDiv.classList.remove('hidden');
+        els.logo.src = CONFIG.logoUrl;
+        els.banner.classList.remove('hidden');
     }
 }
 
 function applyLanguage() {
-    document.getElementById('lang-title-tag').textContent = lang.title;
     document.getElementById('lang-title').textContent = lang.title;
     document.getElementById('lang-name').textContent = lang.name;
     document.getElementById('lang-email').textContent = lang.email;
@@ -574,316 +605,240 @@ function applyLanguage() {
     document.getElementById('lang-date').textContent = lang.date;
     document.getElementById('lang-slots').textContent = lang.slots;
     document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
-    submitBtn.textContent = lang.submit;
-    langBtnNext.textContent = lang.btnNext;
+    els.submit.textContent = lang.submit;
+    els.langBtnNext.textContent = lang.btnNext;
 }
 
 function renderCustomFields() {
     CONFIG.customFields.forEach(field => {
-        const formGroup = document.createElement('div');
-        formGroup.className = 'form-group';
-        const label = document.createElement('label');
-        label.htmlFor = field.id;
-        label.textContent = field.labels[CONFIG.language];
-        if (field.required) label.classList.add('required');
-        const input = document.createElement('input');
-        input.type = field.type;
-        input.id = field.id;
-        input.name = field.id;
-        if (field.required) input.required = true;
-        formGroup.appendChild(label);
-        formGroup.appendChild(input);
-        customFieldsContainer.appendChild(formGroup);
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.innerHTML = `<label for="${field.id}" class="${field.required ? 'required' : ''}">${field.labels[CONFIG.language]}</label>
+                         <input type="${field.type}" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
+        els.customFields.appendChild(div);
     });
 }
 
 function renderServices() {
-    serviceContainer.innerHTML = '';
-    CONFIG.services.forEach(service => {
-        const button = createSelectionButton(service.name, 'service-btn', { 
-            'data-duration': service.duration, 
-            'data-price': service.price,
-            'data-id': service.id 
-        });
-        button.addEventListener('click', () => {
-            handleSelection(button, serviceContainer, selectedServiceId, service.id);
-            selectedServiceDuration.value = service.duration; 
-            if (CONFIG.features.showPrice && service.price) {
-                priceDisplay.textContent = `${lang.pricePrefix}${service.price}${lang.priceSuffix}`;
-                priceDisplay.classList.remove('hidden');
-            } else {
-                priceDisplay.classList.add('hidden');
-            }
-            nextSlotsContainer.classList.add('hidden');
+    els.services.innerHTML = '';
+    CONFIG.services.forEach(svc => {
+        const btn = createBtn(svc.name, 'service-btn', { 'data-duration': svc.duration, 'data-price': svc.price, 'data-id': svc.id });
+        btn.addEventListener('click', () => {
+            handleSelection(btn, els.services, els.svcId, svc.id);
+            els.svcDur.value = svc.duration;
+            if (CONFIG.features.showPrice && svc.price) {
+                els.price.textContent = `${lang.pricePrefix}${svc.price}${lang.priceSuffix}`;
+                els.price.classList.remove('hidden');
+            } else { els.price.classList.add('hidden'); }
+            els.nextContainer.classList.add('hidden');
             checkAvailability();
         });
-        serviceContainer.appendChild(button);
+        els.services.appendChild(btn);
     });
 }
 
 function renderSpecialists() {
     if (CONFIG.specialists.length === 0) {
-        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
-        specialistModule.classList.add('hidden');
+        els.specId.value = CONFIG.defaultSpecialistId;
+        els.specModule.classList.add('hidden');
         return;
     }
-    specialistModule.classList.remove('hidden');
-    CONFIG.specialists.forEach(specialist => {
-        const button = createSelectionButton(specialist.name, 'specialist-btn', { 'data-id': specialist.id });
-        button.addEventListener('click', () => {
-            handleSelection(button, specialistContainer, selectedSpecialistId, specialist.id);
-            nextSlotsContainer.classList.add('hidden');
+    els.specModule.classList.remove('hidden');
+    CONFIG.specialists.forEach(spec => {
+        const btn = createBtn(spec.name, 'specialist-btn', { 'data-id': spec.id });
+        btn.addEventListener('click', () => {
+            handleSelection(btn, els.specialists, els.specId, spec.id);
+            els.nextContainer.classList.add('hidden');
             checkAvailability();
         });
-        specialistContainer.appendChild(button);
+        els.specialists.appendChild(btn);
     });
 }
 
 async function fetchNextAvailableSlots() {
-    if (!selectedServiceId.value) {
-        alert("Please select a service first.");
-        return;
-    }
-
-    const originalBtnText = langBtnNext.textContent;
-    langBtnNext.textContent = lang.btnNextLoading;
-    btnNextAvailable.disabled = true;
-    nextSlotsContainer.innerHTML = '';
-    nextSlotsContainer.classList.remove('hidden');
+    if (!els.svcId.value) { alert("Please select a service first."); return; }
+    
+    const originalText = els.langBtnNext.textContent;
+    els.langBtnNext.textContent = lang.btnNextLoading;
+    els.btnNext.disabled = true;
+    els.nextContainer.innerHTML = '';
+    els.nextContainer.classList.remove('hidden');
 
     try {
-        const response = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const res = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK);
+        if (!res.ok) throw new Error("API Error");
+        const data = await res.json();
         
-        if (!response.ok) throw new Error("API Error");
-        const data = await response.json();
-        const allSlots = data.slots || []; 
+        const currentSpec = els.specId.value;
+        let slots = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec).slice(0, 5);
 
-        const currentSpecId = selectedSpecialistId.value;
-        const serviceDuration = parseInt(selectedServiceDuration.value) || 30;
-
-        let filteredSlots = allSlots;
-        if (currentSpecId) {
-            filteredSlots = filteredSlots.filter(s => s.specialistId === currentSpecId);
-        }
-
-        const top5 = filteredSlots.slice(0, 5);
-
-        if (top5.length === 0) {
-            nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:14px; padding:10px;">${lang.statusNoSlots}</p>`;
+        if (slots.length === 0) {
+            els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:13px;">${lang.statusNoSlots}</p>`;
         } else {
-            top5.forEach(slot => {
-                const dateObj = new Date(slot.date);
-                const dayName = dateObj.toLocaleDateString(CONFIG.language, { weekday: 'long' });
-                const dateStr = dateObj.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'short' });
+            slots.forEach(slot => {
+                const d = new Date(slot.date);
+                const day = d.toLocaleDateString(CONFIG.language, { weekday: 'long' });
+                const dateStr = d.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'short' });
+                const specName = (CONFIG.specialists.find(s => s.id === slot.specialistId) || {}).name || "Specialist";
                 
-                const specObj = CONFIG.specialists.find(s => s.id === slot.specialistId);
-                const specName = specObj ? specObj.name : "Specialist";
-
                 const card = document.createElement('div');
                 card.className = 'next-slot-card';
                 card.innerHTML = `
                     <div class="next-slot-info">
-                        <span class="slot-day-date">${dayName}, ${dateStr}</span>
+                        <span class="slot-day-date">${day}, ${dateStr}</span>
                         <span class="slot-specialist">${specName}</span>
                     </div>
-                    <span class="slot-time-badge">${slot.startTime.padStart(5, '0')}</span>
+                    <span class="slot-time-badge">${slot.startTime}</span>
                 `;
-
                 card.addEventListener('click', () => {
-                    dateInput.value = slot.date;
-                    
-                    if (!selectedSpecialistId.value || selectedSpecialistId.value !== slot.specialistId) {
-                        selectedSpecialistId.value = slot.specialistId;
-                        specialistContainer.querySelectorAll('.specialist-btn').forEach(btn => {
-                            if (btn.getAttribute('data-id') === slot.specialistId) {
-                                handleSelection(btn, specialistContainer, selectedSpecialistId, slot.specialistId);
-                            }
+                    els.date.value = slot.date;
+                    if (!els.specId.value || els.specId.value !== slot.specialistId) {
+                        els.specId.value = slot.specialistId;
+                        els.specialists.querySelectorAll('.specialist-btn').forEach(b => {
+                            if (b.getAttribute('data-id') === slot.specialistId) handleSelection(b, els.specialists, els.specId, slot.specialistId);
                         });
                     }
-                    nextSlotsContainer.classList.add('hidden');
+                    els.nextContainer.classList.add('hidden');
                     autoSelectTime(slot.startTime);
                 });
-
-                nextSlotsContainer.appendChild(card);
+                els.nextContainer.appendChild(card);
             });
         }
-
     } catch (e) {
-        console.error(e);
-        nextSlotsContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:14px;">${lang.statusError}</p>`;
+        els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:13px;">${lang.statusError}</p>`;
     } finally {
-        langBtnNext.textContent = originalBtnText;
-        btnNextAvailable.disabled = false;
+        els.langBtnNext.textContent = originalText;
+        els.btnNext.disabled = false;
     }
 }
 
-async function autoSelectTime(targetTime) {
+async function autoSelectTime(target) {
     await checkAvailability();
-    
     setTimeout(() => {
-        const buttons = slotContainer.querySelectorAll('.slot-button');
         let found = false;
-        buttons.forEach(btn => {
-            const btnTime = btn.getAttribute('data-time').replace(/^0/, '');
-            const target = targetTime.replace(/^0/, '');
-            
-            if (btnTime === target) {
+        els.slots.querySelectorAll('.slot-button').forEach(btn => {
+            const t1 = btn.getAttribute('data-time').replace(/^0/, '');
+            const t2 = target.replace(/^0/, '');
+            if (t1 === t2) {
                 btn.click();
                 btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 found = true;
             }
         });
-        if (!found) {
-            console.warn("Slot from 'Next 5' not found.");
-        }
     }, 100);
 }
 
 async function checkAvailability() {
-    const dateString = dateInput.value;
-    const workerId = selectedSpecialistId.value;
-    const serviceId = selectedServiceId.value; 
-    const duration = selectedServiceDuration.value;
+    const { value: date } = els.date;
+    const { value: worker } = els.specId;
+    const { value: svc } = els.svcId;
+    const { value: dur } = els.svcDur;
 
-    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
-    selectedTimeSlot.value = '';
-    submitBtn.disabled = true;
-    statusDiv.textContent = '';
-    statusDiv.className = '';
+    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
+    els.time.value = '';
+    els.submit.disabled = true;
+    els.waitlistTrigger.classList.add('hidden');
 
-    if (!dateString || !workerId || !serviceId) {
-        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+    if (!date || !worker || !svc) {
+        els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
         return;
     }
 
     try {
-        const response = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
+        const res = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                dateString: dateString,
-                workerId: workerId,
-                serviceId: serviceId, 
-                duration: duration 
-            })
+            body: JSON.stringify({ dateString: date, workerId: worker, serviceId: svc, duration: dur })
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        const availableSlots = Array.isArray(data) ? data : data.slots;
-        renderSlotButtons(availableSlots);
-    } catch (error) {
-        console.error('Error fetching slots:', error);
-        statusDiv.className = 'error';
-        statusDiv.textContent = lang.statusError;
-        slotContainer.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const slots = Array.isArray(data) ? data : data.slots;
+        
+        els.slots.innerHTML = '';
+        if (!slots || slots.length === 0) {
+            els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
+            els.waitlistTrigger.classList.remove('hidden'); // SHOW WAITLIST
+        } else {
+            slots.forEach(t => {
+                const btn = createBtn(t, 'slot-button', { 'data-time': t });
+                btn.addEventListener('click', () => {
+                    handleSelection(btn, els.slots, els.time, t);
+                    els.submit.disabled = false;
+                });
+                els.slots.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        els.slots.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
     }
-}
-
-function renderSlotButtons(slots) {
-    slotContainer.innerHTML = '';
-    if (!slots || slots.length === 0) {
-        slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
-        return;
-    }
-    slots.forEach(slotTime => {
-        const button = createSelectionButton(slotTime, 'slot-button', { 'data-time': slotTime });
-        button.addEventListener('click', () => {
-            handleSelection(button, slotContainer, selectedTimeSlot, slotTime);
-            submitBtn.disabled = false;
-        });
-        slotContainer.appendChild(button);
-    });
 }
 
 async function handleFormSubmission(e) {
     e.preventDefault();
-    const serviceId = selectedServiceId.value;
-    const specialistId = selectedSpecialistId.value;
-    const timeSlot = selectedTimeSlot.value;
-    const date = dateInput.value;
-    const bookingStartTime = `${date}T${timeSlot}:00.000Z`;
+    els.submit.disabled = true;
+    els.submit.textContent = lang.statusBooking;
+    els.status.textContent = lang.statusBooking;
+    els.status.className = '';
 
     const payload = {
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
-        bookingStartTime: bookingStartTime, 
-        serviceId: serviceId, 
-        specialistId: specialistId,
+        bookingStartTime: `${els.date.value}T${els.time.value}:00.000Z`,
+        serviceId: els.svcId.value,
+        specialistId: els.specId.value,
         clientName: document.getElementById('name').value,
         customData: {}
     };
-    CONFIG.customFields.forEach(field => {
-        const input = document.getElementById(field.id);
-        if (input) payload.customData[field.id] = input.value;
+    CONFIG.customFields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) payload.customData[f.id] = el.value;
     });
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = lang.statusBooking;
-    statusDiv.textContent = lang.statusBooking;
-    statusDiv.className = '';
-
     try {
-        const response = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
+        const res = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        const result = await response.json();
-        if (response.ok && result && result.status === 'success') {
-            statusDiv.className = 'success';
-            statusDiv.textContent = lang.statusSuccess;
-            form.reset();
-            clearAllSelections();
-            nextSlotsContainer.classList.add('hidden'); 
-        } else {
-            throw new Error(result.message || response.statusText);
-        }
-    } catch (error) {
-        statusDiv.className = 'error';
-        statusDiv.textContent = `${lang.statusFailed}${error.message}`;
+        const json = await res.json();
+        if (res.ok && json.status === 'success') {
+            els.status.className = 'success';
+            els.status.textContent = lang.statusSuccess;
+            els.form.reset();
+            clearAll();
+            els.nextContainer.classList.add('hidden');
+        } else { throw new Error(json.message || res.statusText); }
+    } catch (err) {
+        els.status.className = 'error';
+        els.status.textContent = `${lang.statusFailed}${err.message}`;
     } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = lang.submit;
+        els.submit.disabled = false;
+        els.submit.textContent = lang.submit;
     }
 }
 
-function createSelectionButton(text, className, dataAttributes) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = className + ' selection-btn';
-    button.textContent = text;
-    for (const key in dataAttributes) {
-        button.setAttribute(key, dataAttributes[key]);
-    }
-    return button;
+function createBtn(txt, cls, attrs) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls + ' selection-btn';
+    b.textContent = txt;
+    for (const k in attrs) b.setAttribute(k, attrs[k]);
+    return b;
 }
 
-function handleSelection(clickedButton, container, hiddenInput, value) {
-    container.querySelectorAll('.selection-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    clickedButton.classList.add('selected');
-    hiddenInput.value = value;
+function handleSelection(btn, container, input, val) {
+    container.querySelectorAll('.selection-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    input.value = val;
 }
 
-function clearAllSelections() {
-    document.querySelectorAll('.selection-btn.selected').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    slotContainer.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
-    priceDisplay.classList.add('hidden');
-    selectedServiceId.value = ''; 
-    selectedServiceDuration.value = '';
-    if (CONFIG.specialists.length > 0) {
-        selectedSpecialistId.value = '';
-    } else {
-        selectedSpecialistId.value = CONFIG.defaultSpecialistId;
-    }
-    selectedTimeSlot.value = '';
-    submitBtn.disabled = true;
+function clearAll() {
+    document.querySelectorAll('.selection-btn.selected').forEach(b => b.classList.remove('selected'));
+    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+    els.price.classList.add('hidden');
+    els.svcId.value = ''; els.svcDur.value = ''; els.time.value = '';
+    els.specId.value = CONFIG.specialists.length ? '' : CONFIG.defaultSpecialistId;
+    els.submit.disabled = true;
 }
 </script>
 </body>
