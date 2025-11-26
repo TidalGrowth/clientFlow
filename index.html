@@ -196,7 +196,7 @@ input:focus {
     background-color: var(--slot-bg);
     border: 1px solid var(--support);
     border-radius: var(--radius-pill); 
-    padding: 10px 12px;
+    padding: 8px 16px;
     font-size: 14px;
     /* UPDATED: Made bold to match the Next 5 style */
     font-weight: 600; 
@@ -689,7 +689,7 @@ async function fetchNextAvailableSlots() {
                         <span class="slot-day-date">${dayName}, ${dateStr}</span>
                         <span class="slot-specialist">${specName}</span>
                     </div>
-                    <span class="slot-time-badge">${slot.startTime}</span>
+                    <span class="slot-time-badge">${slot.startTime.padStart(5, '0')}</span>
                 `;
 
                 card.addEventListener('click', () => {
