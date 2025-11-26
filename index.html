@@ -19,7 +19,7 @@
     --support: #E0E0E0;       /* Borders */
     --text-sub: #666666;
     --input-bg: #FFFFFF;
-    --slot-bg: #FFFFFF;
+    --slot-bg: #FFFFFF;       /* White for slots */
     --slot-hover: rgba(41, 98, 255, 0.04);
     --danger: #D32F2F;
     --success: #388E3C;
@@ -59,7 +59,7 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 20px 15px; /* Reduced padding */
+    padding: 20px 15px;
     box-sizing: border-box;
     transition: background-color 0.3s ease;
 }
@@ -90,7 +90,7 @@ body {
 
 .container {
     background-color: var(--surface);
-    padding: 24px; /* Compact padding */
+    padding: 24px;
     box-sizing: border-box; 
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
@@ -109,18 +109,17 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px; /* Reduced margin */
+    margin-bottom: 20px;
 }
 
 h2 {
     color: var(--primary);
     margin: 0;
     font-weight: 700;
-    font-size: 22px; /* Slightly smaller title */
+    font-size: 22px;
     letter-spacing: -0.5px;
 }
 
-/* Theme Toggle Button */
 .theme-toggle {
     background: transparent;
     border: none;
@@ -139,10 +138,10 @@ h2 {
 }
 
 /* =========================================
-   3. FORM ELEMENTS (COMPACT)
+   3. FORM ELEMENTS
    ========================================= */
 .form-group {
-    margin-bottom: 12px; /* Significantly reduced spacing */
+    margin-bottom: 12px;
 }
 
 label {
@@ -150,7 +149,7 @@ label {
     margin-bottom: 6px;
     color: var(--primary);
     font-weight: 600;
-    font-size: 13px; /* Slightly smaller label */
+    font-size: 13px;
 }
 
 label.required::after {
@@ -158,13 +157,12 @@ label.required::after {
     color: var(--accent);
 }
 
-/* Inputs */
 input[type="text"], 
 input[type="email"], 
 input[type="tel"], 
 input[type="date"] {
     width: 100%;
-    padding: 10px 12px; /* Reduced padding (height) */
+    padding: 10px 12px;
     border: 1px solid var(--support);
     border-radius: var(--radius-input);
     box-sizing: border-box;
@@ -182,28 +180,26 @@ input:focus {
 }
 
 /* =========================================
-   4. BUTTONS & PILL SHAPES
+   4. BUTTONS & PILL SHAPES (UNIFIED)
    ========================================= */
 .selection-grid {
     display: grid;
-    /* Auto-fit grid ensures items stay same size */
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 8px; 
 }
 
 #service-container.selection-grid {
-    /* Services often need more width for text */
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
 .selection-btn, .slot-button {
     background-color: var(--slot-bg);
     border: 1px solid var(--support);
-    /* THE PILL SHAPE */
     border-radius: var(--radius-pill); 
-    padding: 10px 12px; /* Compact padding */
+    padding: 10px 12px;
     font-size: 13px;
-    font-weight: 500;
+    /* UPDATED: Made bold to match the Next 5 style */
+    font-weight: 600; 
     color: var(--primary);
     cursor: pointer;
     transition: var(--transition);
@@ -213,7 +209,7 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px; /* Reduced height */
+    min-height: 40px;
 }
 
 .selection-btn:hover, .slot-button:hover {
@@ -284,7 +280,7 @@ input:focus {
 .next-slot-card {
     background-color: var(--surface);
     border: 1px solid var(--support);
-    border-radius: 12px; /* Slight pill-card hybrid */
+    border-radius: 12px;
     padding: 12px 16px;
     cursor: pointer;
     transition: var(--transition);
@@ -316,14 +312,17 @@ input:focus {
     margin-top: 2px;
 }
 
+/* UPDATED: BADGE STYLING TO MATCH SLOT BUTTONS */
 .slot-time-badge {
-    background-color: var(--secondary);
+    background-color: var(--slot-bg); /* Was secondary, now matches button bg */
     color: var(--primary);
-    padding: 6px 12px;
+    padding: 8px 16px; /* Slightly wider padding */
     border-radius: var(--radius-pill);
-    font-weight: 700;
-    font-size: 13px;
-    border: 1px solid var(--support);
+    font-weight: 600; /* Bold */
+    font-size: 14px;
+    border: 1px solid var(--support); /* Consistent Border */
+    min-width: 60px; /* Ensure minimum width like buttons */
+    text-align: center;
 }
 
 /* =========================================
@@ -331,11 +330,11 @@ input:focus {
    ========================================= */
 button[type="submit"] {
     width: 100%;
-    padding: 14px; /* Compact */
+    padding: 14px;
     background-color: var(--accent);
     color: var(--accent-text);
     border: none;
-    border-radius: var(--radius-pill); /* Pill Shape! */
+    border-radius: var(--radius-pill);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -458,7 +457,7 @@ const CONFIG = {
     strings: {
         en: {
             title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Next 5 Available Slots", btnNextLoading: "Searching..."
+            btnNext: "Find Next Available Slots", btnNextLoading: "Searching..."
         },
         de: {
             title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
@@ -466,7 +465,7 @@ const CONFIG = {
         },
         sl: {
             title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Naslednjih 5 terminov", btnNextLoading: "Iščem..."
+            btnNext: "Najdi naslednje proste termine", btnNextLoading: "Iščem..."
         }
     },
 
@@ -543,7 +542,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- DARK MODE TOGGLE ---
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
-    // Toggle Icons
     if (document.body.classList.contains('dark-mode')) {
         iconSun.classList.add('hidden');
         iconMoon.classList.remove('hidden');
