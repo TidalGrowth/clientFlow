@@ -374,4 +374,574 @@ input:focus {
 button[type="submit"], #waitlist-submit {
     width: 100%; padding: 14px; background-color: var(--accent); color: var(--accent-text);
     border: none; border-radius: var(--radius-pill); font-size: 16px; font-weight: 600;
-    cursor: pointer; margin-top: 12px; transition: var
+    cursor: pointer; margin-top: 12px; transition: var(--transition);
+    box-shadow: 0 4px 10px rgba(41, 98, 255, 0.2);
+}
+button[type="submit"]:disabled {
+    background-color: var(--support); color: var(--text-sub); cursor: not-allowed; box-shadow: none;
+}
+
+#status { margin-top: 16px; padding: 12px; border-radius: var(--radius-input); text-align: center; font-size: 14px; font-weight: 500; }
+.error { background-color: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
+.success { background-color: var(--success-bg); color: var(--success); border: 1px solid #c8e6c9; }
+.hidden { display: none; }
+
+</style>
+</head>
+<body>
+
+<div id="banner" class="hidden">
+<img id="client-logo" alt="Client Logo">
+</div>
+
+<div class="container">
+    <div class="header-row">
+        <h2 id="lang-title"></h2>
+        <button class="theme-toggle" id="theme-toggle">
+            <span id="icon-sun">☀️</span>
+            <span id="icon-moon" class="hidden">🌙</span>
+        </button>
+    </div>
+
+    <form id="bookingForm">
+        <div class="form-group">
+            <label for="name" id="lang-name" class="required"></label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="email" id="lang-email"></label>
+            <input type="email" id="email" placeholder="Optional">
+        </div>
+        <div id="custom-fields-container"></div>
+
+        <div class="form-group" id="service-module">
+            <label id="lang-service" class="required"></label>
+            <div id="service-container" class="selection-grid"></div>
+            <div id="price-display" class="hidden"></div>
+        </div>
+
+        <div class="form-group hidden" id="specialist-module">
+            <label id="lang-specialist" class="required"></label>
+            <div id="specialist-container" class="selection-grid"></div>
+        </div>
+
+        <div id="next-slots-wrapper">
+            <button type="button" id="btn-next-available">
+                <span>⚡</span> <span id="lang-btn-next">See Next 4 Available Slots</span>
+            </button>
+            <div id="next-slots-container" class="hidden"></div>
+        </div>
+
+        <div class="form-group">
+            <label id="lang-date" class="required"></label>
+            <div id="quick-days-wrapper">
+                <div id="quick-days-container"></div>
+            </div>
+            <input type="date" id="date" required>
+        </div>
+
+        <div class="form-group">
+            <label id="lang-slots"></label>
+            <div id="slot-container" class="selection-grid">
+                <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);"></p>
+            </div>
+            <div id="waitlist-trigger" class="hidden">
+                <p style="margin:0; color:var(--text-sub);">
+                    Can't find a time? <a id="open-waitlist">Join the Waitlist</a>
+                </p>
+            </div>
+        </div>
+
+        <input type="hidden" id="selectedServiceId" required>
+        <input type="hidden" id="selectedServiceDuration" required>
+        <input type="hidden" id="selectedSpecialistId" required>
+        <input type="hidden" id="selectedTimeSlot" required>
+
+        <button type="submit" id="lang-submit" disabled></button>
+    </form>
+
+    <div id="status"></div>
+</div>
+
+<div class="modal-overlay" id="waitlist-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Join Waitlist</h3>
+            <button class="close-modal" id="close-waitlist">×</button>
+        </div>
+        <p style="font-size:13px; color:var(--text-sub); margin-bottom:15px;">
+            If a slot becomes available, we will email you.
+        </p>
+        <form id="waitlistForm">
+            <div class="form-group">
+                <label class="required">Preferred Date Range</label>
+                <input type="text" id="waitlist-range" required>
+            </div>
+            <button type="submit" id="waitlist-submit">Join Waitlist</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const CONFIG = {
+    language: 'en',
+    logoUrl: 'https://files.catbox.moe/jcjk1q.png',
+    
+    SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
+    BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
+    NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
+    WAITLIST_WEBHOOK: "https://n8n.tidal-growth.com/webhook/join-waitlist",
+    
+    features: { showPrice: false },
+    workingDays: [1, 2, 3, 4, 5],
+
+    strings: {
+        en: {
+            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
+            btnNext: "Next 4 Available Slots", btnNextLoading: "Searching...",
+            dayNames: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+            waitlistSuccess: "Added to waitlist!"
+        },
+        de: {
+            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
+            btnNext: "Nächste 4 freie Termine", btnNextLoading: "Suche...",
+            dayNames: ["SO", "MO", "DI", "MI", "DO", "FR", "SA"],
+            waitlistSuccess: "Zur Warteliste hinzugefügt!"
+        },
+        sl: {
+            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
+            btnNext: "Naslednji 4 termini", btnNextLoading: "Iščem...",
+            dayNames: ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"],
+            waitlistSuccess: "Dodano na čakalno listo!"
+        }
+    },
+    services: [
+        { id: "SVC_CALL", name: "30 min Call", duration: 30, price: 50 },
+        { id: "SVC_STRATEGY", name: "60 min Strategy", duration: 60, price: 90 },
+        { id: "SVC_PLANNING", name: "90 min Planning", duration: 90, price: 150 },
+        { id: "SVC_COLOR", name: "Full Color (2h)", duration: 120, price: 180 } 
+    ],
+    specialists: [
+        { name: "Specialist A", id: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com" },
+        { name: "Specialist B", id: "c_fe27362b4a113006914e848ceba9d7758c4d4dc1f55d67e7084dc90355e5b499@group.calendar.google.com" }
+    ],
+    defaultSpecialistId: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com",
+    customFields: [
+        { id: "phone", type: "tel", required: false, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
+        { id: "goal", type: "text", required: false, labels: { en: "Comment", de: "Kommentar", sl: "Opomba" } }
+    ]
+};
+
+const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
+const els = {
+    customFields: document.getElementById('custom-fields-container'),
+    services: document.getElementById('service-container'),
+    specialists: document.getElementById('specialist-container'),
+    specModule: document.getElementById('specialist-module'),
+    date: document.getElementById('date'),
+    slots: document.getElementById('slot-container'),
+    price: document.getElementById('price-display'),
+    submit: document.getElementById('lang-submit'),
+    status: document.getElementById('status'),
+    form: document.getElementById('bookingForm'),
+    banner: document.getElementById('banner'),
+    logo: document.getElementById('client-logo'),
+    btnNext: document.getElementById('btn-next-available'),
+    nextContainer: document.getElementById('next-slots-container'),
+    langBtnNext: document.getElementById('lang-btn-next'),
+    themeToggle: document.getElementById('theme-toggle'),
+    sun: document.getElementById('icon-sun'),
+    moon: document.getElementById('icon-moon'),
+    quickDays: document.getElementById('quick-days-container'),
+    waitlistTrigger: document.getElementById('waitlist-trigger'),
+    openWaitlist: document.getElementById('open-waitlist'),
+    waitlistModal: document.getElementById('waitlist-modal'),
+    closeWaitlist: document.getElementById('close-waitlist'),
+    waitlistForm: document.getElementById('waitlistForm'),
+    svcId: document.getElementById('selectedServiceId'),
+    svcDur: document.getElementById('selectedServiceDuration'),
+    specId: document.getElementById('selectedSpecialistId'),
+    time: document.getElementById('selectedTimeSlot')
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyBranding();
+    applyLanguage();
+    renderCustomFields();
+    renderServices();
+    renderSpecialists();
+    renderQuickDays();
+
+    const today = new Date();
+    els.date.min = today.toISOString().split('T')[0];
+
+    els.date.addEventListener('change', () => {
+        els.nextContainer.classList.add('hidden');
+        els.nextContainer.innerHTML = '';
+        // Reset quick days visual state
+        els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
+        // Highlight logic if manual date matches a button could go here, but optional
+        checkAvailability();
+    });
+    
+    els.btnNext.addEventListener('click', fetchNextAvailableSlots);
+    els.form.addEventListener('submit', handleFormSubmission);
+    els.themeToggle.addEventListener('click', toggleTheme);
+    els.openWaitlist.addEventListener('click', () => els.waitlistModal.classList.add('active'));
+    els.closeWaitlist.addEventListener('click', () => els.waitlistModal.classList.remove('active'));
+    els.waitlistForm.addEventListener('submit', handleWaitlistSubmission);
+});
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    els.sun.classList.toggle('hidden', isDark);
+    els.moon.classList.toggle('hidden', !isDark);
+}
+
+function applyBranding() {
+    if (CONFIG.logoUrl) {
+        els.logo.src = CONFIG.logoUrl;
+        els.banner.classList.remove('hidden');
+    }
+}
+
+function applyLanguage() {
+    document.getElementById('lang-title').textContent = lang.title;
+    document.getElementById('lang-name').textContent = lang.name;
+    document.getElementById('lang-email').textContent = lang.email;
+    document.getElementById('lang-service').textContent = lang.service;
+    document.getElementById('lang-specialist').textContent = lang.specialist;
+    document.getElementById('lang-date').textContent = lang.date;
+    document.getElementById('lang-slots').textContent = lang.slots;
+    document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
+    els.submit.textContent = lang.submit;
+    els.langBtnNext.textContent = lang.btnNext;
+}
+
+function renderCustomFields() {
+    CONFIG.customFields.forEach(field => {
+        const div = document.createElement('div');
+        div.className = 'form-group';
+        div.innerHTML = `<label for="${field.id}" class="${field.required ? 'required' : ''}">${field.labels[CONFIG.language]}</label>
+                         <input type="${field.type}" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
+        els.customFields.appendChild(div);
+    });
+}
+
+function renderServices() {
+    els.services.innerHTML = '';
+    CONFIG.services.forEach(svc => {
+        const btn = createBtn(svc.name, 'service-btn', { 'data-duration': svc.duration, 'data-price': svc.price, 'data-id': svc.id });
+        btn.addEventListener('click', () => {
+            handleSelection(btn, els.services, els.svcId, svc.id);
+            els.svcDur.value = svc.duration;
+            if (CONFIG.features.showPrice && svc.price) {
+                els.price.textContent = `${lang.pricePrefix}${svc.price}${lang.priceSuffix}`;
+                els.price.classList.remove('hidden');
+            } else { els.price.classList.add('hidden'); }
+            els.nextContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        els.services.appendChild(btn);
+    });
+}
+
+function renderSpecialists() {
+    if (CONFIG.specialists.length === 0) {
+        els.specId.value = CONFIG.defaultSpecialistId;
+        els.specModule.classList.add('hidden');
+        return;
+    }
+    els.specModule.classList.remove('hidden');
+    CONFIG.specialists.forEach(spec => {
+        const btn = createBtn(spec.name, 'specialist-btn', { 'data-id': spec.id });
+        btn.addEventListener('click', () => {
+            if (btn.classList.contains('selected')) {
+                btn.classList.remove('selected');
+                els.specId.value = ''; 
+            } else {
+                handleSelection(btn, els.specialists, els.specId, spec.id);
+            }
+            els.nextContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        els.specialists.appendChild(btn);
+    });
+}
+
+function renderQuickDays() {
+    els.quickDays.innerHTML = '';
+    const today = new Date();
+    const currentDayIdx = today.getDay(); 
+
+    CONFIG.workingDays.forEach(targetIdx => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-day-btn';
+        
+        const targetDate = new Date(today);
+        let isNextWeek = false;
+        let isToday = false;
+
+        // Logic for Today, This Week, Next Week
+        if (targetIdx === currentDayIdx && today.getHours() < 17) {
+            // Is Today (and within working hours roughly)
+            isToday = true;
+            btn.classList.add('is-today');
+        } else if (targetIdx < currentDayIdx || (targetIdx === currentDayIdx && today.getHours() >= 17)) {
+            // Passed -> Next Week
+            const diff = targetIdx - currentDayIdx + 7;
+            targetDate.setDate(today.getDate() + diff);
+            isNextWeek = true;
+            btn.classList.add('next-week');
+        } else {
+            // Upcoming This Week
+            const diff = targetIdx - currentDayIdx;
+            targetDate.setDate(today.getDate() + diff);
+        }
+
+        const isoDate = targetDate.toISOString().split('T')[0];
+        btn.textContent = lang.dayNames[targetIdx]; 
+        
+        btn.addEventListener('click', () => {
+            els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            els.date.value = isoDate;
+            els.nextContainer.classList.add('hidden');
+            checkAvailability();
+        });
+        els.quickDays.appendChild(btn);
+    });
+}
+
+async function fetchNextAvailableSlots() {
+    if (!els.svcId.value) { alert("Please select a service first."); return; }
+    
+    const originalText = els.langBtnNext.textContent;
+    els.langBtnNext.textContent = lang.btnNextLoading;
+    els.btnNext.disabled = true;
+    els.nextContainer.innerHTML = '';
+    els.nextContainer.classList.remove('hidden');
+
+    try {
+        const res = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK);
+        if (!res.ok) throw new Error("API Error");
+        const data = await res.json();
+        
+        const currentSpec = els.specId.value;
+        // Logic: Filter by specialist if selected, then take top 4
+        let slots = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec).slice(0, 4);
+
+        if (slots.length === 0) {
+            els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:13px; grid-column:span 2;">${lang.statusNoSlots}</p>`;
+        } else {
+            slots.forEach(slot => {
+                const d = new Date(slot.date);
+                // FORMAT: Fri, 28/11 (DD/MM)
+                const day = d.toLocaleDateString(CONFIG.language, { weekday: 'short' });
+                const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
+                const specName = (CONFIG.specialists.find(s => s.id === slot.specialistId) || {}).name || "Spec";
+                
+                const card = document.createElement('div');
+                card.className = 'next-slot-card';
+                // COMPACT LAYOUT
+                card.innerHTML = `
+                    <div class="slot-primary-line">
+                        <span>${day} ${dateStr}</span>
+                        <span>•</span>
+                        <span>${slot.startTime.toString().padStart(5, '0')}</span>
+                    </div>
+                    <div class="slot-secondary-line">${specName}</div>
+                `;
+                card.addEventListener('click', () => {
+                    els.date.value = slot.date;
+                    if (!els.specId.value || els.specId.value !== slot.specialistId) {
+                        els.specId.value = slot.specialistId;
+                        els.specialists.querySelectorAll('.specialist-btn').forEach(b => {
+                            if (b.getAttribute('data-id') === slot.specialistId) handleSelection(b, els.specialists, els.specId, slot.specialistId);
+                        });
+                    }
+                    els.nextContainer.classList.add('hidden');
+                    autoSelectTime(slot.startTime);
+                });
+                els.nextContainer.appendChild(card);
+            });
+        }
+    } catch (e) {
+        els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:13px; grid-column:span 2;">${lang.statusError}</p>`;
+    } finally {
+        els.langBtnNext.textContent = originalText;
+        els.btnNext.disabled = false;
+    }
+}
+
+async function autoSelectTime(target) {
+    await checkAvailability();
+    setTimeout(() => {
+        let found = false;
+        els.slots.querySelectorAll('.slot-button').forEach(btn => {
+            const t1 = btn.getAttribute('data-time').replace(/^0/, '');
+            const t2 = target.replace(/^0/, '');
+            if (t1 === t2) {
+                btn.click();
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                found = true;
+            }
+        });
+    }, 100);
+}
+
+async function checkAvailability() {
+    const { value: date } = els.date;
+    const { value: worker } = els.specId;
+    const { value: svc } = els.svcId;
+    const { value: dur } = els.svcDur;
+
+    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
+    els.time.value = '';
+    els.submit.disabled = true;
+    els.waitlistTrigger.classList.add('hidden');
+
+    if (!date || !svc) {
+        els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+        return;
+    }
+
+    const checkWorker = worker || CONFIG.defaultSpecialistId;
+
+    try {
+        const res = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dateString: date, workerId: checkWorker, serviceId: svc, duration: dur })
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const slots = Array.isArray(data) ? data : data.slots;
+        
+        els.slots.innerHTML = '';
+        if (!slots || slots.length === 0) {
+            els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
+            els.waitlistTrigger.classList.remove('hidden'); 
+        } else {
+            slots.forEach(t => {
+                const btn = createBtn(t, 'slot-button', { 'data-time': t });
+                btn.addEventListener('click', () => {
+                    handleSelection(btn, els.slots, els.time, t);
+                    els.submit.disabled = false;
+                });
+                els.slots.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        els.slots.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
+    }
+}
+
+async function handleFormSubmission(e) {
+    e.preventDefault();
+    els.submit.disabled = true;
+    els.submit.textContent = lang.statusBooking;
+    els.status.textContent = lang.statusBooking;
+    els.status.className = '';
+
+    const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        bookingStartTime: `${els.date.value}T${els.time.value}:00.000Z`,
+        serviceId: els.svcId.value,
+        specialistId: els.specId.value || CONFIG.defaultSpecialistId,
+        clientName: document.getElementById('name').value,
+        customData: {}
+    };
+    CONFIG.customFields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) payload.customData[f.id] = el.value;
+    });
+
+    try {
+        const res = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (res.ok && json.status === 'success') {
+            els.status.className = 'success';
+            els.status.textContent = lang.statusSuccess;
+            els.form.reset();
+            clearAll();
+            els.nextContainer.classList.add('hidden');
+        } else { throw new Error(json.message || res.statusText); }
+    } catch (err) {
+        els.status.className = 'error';
+        els.status.textContent = `${lang.statusFailed}${err.message}`;
+    } finally {
+        els.submit.disabled = false;
+        els.submit.textContent = lang.submit;
+    }
+}
+
+async function handleWaitlistSubmission(e) {
+    e.preventDefault();
+    const btn = document.getElementById('waitlist-submit');
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+    
+    const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone') ? document.getElementById('phone').value : "",
+        range: document.getElementById('waitlist-range').value,
+        serviceId: els.svcId.value,
+        specialistId: els.specId.value
+    };
+
+    try {
+        const res = await fetch(CONFIG.WAITLIST_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            alert(lang.waitlistSuccess);
+            els.waitlistModal.classList.remove('active');
+        } else {
+            alert(lang.statusError);
+        }
+    } catch (err) {
+        alert(lang.statusError);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Join Waitlist";
+    }
+}
+
+function createBtn(txt, cls, attrs) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls + ' selection-btn';
+    b.textContent = txt;
+    for (const k in attrs) b.setAttribute(k, attrs[k]);
+    return b;
+}
+
+function handleSelection(btn, container, input, val) {
+    container.querySelectorAll('.selection-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    input.value = val;
+}
+
+function clearAll() {
+    document.querySelectorAll('.selection-btn.selected').forEach(b => b.classList.remove('selected'));
+    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
+    els.price.classList.add('hidden');
+    els.svcId.value = ''; els.svcDur.value = ''; els.time.value = '';
+    els.specId.value = CONFIG.specialists.length ? '' : CONFIG.defaultSpecialistId;
+    els.submit.disabled = true;
+    if (els.quickDays) els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
+}
+</script>
+</body>
+</html>
