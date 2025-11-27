@@ -24,6 +24,7 @@
     --pill-hover: #EAEAEA;
     
     /* QUICK DAY COLORS */
+    --day-this-week-bg: #F5F5F7;
     --day-next-week-bg: #333333;
     --day-next-week-text: #FFFFFF;
     --day-today-border: #2962FF;
@@ -54,6 +55,7 @@ body.dark-mode {
     --pill-bg: #2C2C2C;       
     --pill-hover: #383838;
     
+    --day-this-week-bg: #2C2C2C;
     --day-next-week-bg: #555555;
     --day-next-week-text: #FFFFFF;
     --day-today-border: #5381FF;
@@ -204,7 +206,7 @@ input:focus {
     transition: var(--transition);
     text-align: center;
     box-sizing: border-box; 
-    height: 36px;
+    height: 38px; /* UNIFIED HEIGHT */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -233,7 +235,7 @@ input:focus {
 }
 
 /* =========================================
-   5. QUICK DAY SELECTOR (4 COLORS)
+   5. QUICK DAY SELECTOR (4 STATES)
    ========================================= */
 #quick-days-wrapper { margin-bottom: 12px; }
 #quick-days-container {
@@ -244,7 +246,7 @@ input:focus {
 
 /* 1. THIS WEEK: Default (.quick-day-btn) */
 
-/* 2. NEXT WEEK: Dark */
+/* 2. NEXT WEEK: Dark Contrast */
 .quick-day-btn.next-week {
     background-color: var(--day-next-week-bg);
     color: var(--day-next-week-text);
@@ -263,7 +265,7 @@ input:focus {
 
 
 /* =========================================
-   6. NEXT 4 SLOTS (COMPACT & UNIFIED)
+   6. NEXT 4 SLOTS (COMPACT GRID)
    ========================================= */
 #next-slots-wrapper { margin-bottom: 16px; }
 
@@ -295,20 +297,20 @@ input:focus {
     gap: 8px;
 }
 
-/* COMPACT CARD that looks like a button */
+/* ULTRA COMPACT CARD */
 .next-slot-card {
-    background-color: var(--pill-bg); /* Match other buttons */
+    background-color: var(--pill-bg); /* Matches standard buttons */
     border: 1px solid var(--support);
-    border-radius: 12px;
-    /* Very tight padding to match button height roughly */
-    padding: 8px 12px; 
+    border-radius: var(--radius-pill); /* Full Pill */
+    padding: 2px 10px; /* Minimal padding */
     cursor: pointer;
     transition: var(--transition);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center; /* Center content like a button */
-    min-height: 48px; /* Slightly taller than simple button to fit 2 lines */
+    align-items: center; 
+    height: 42px; /* Fixed height, slightly taller than single line */
+    line-height: 1.1;
 }
 
 .next-slot-card:hover {
@@ -318,22 +320,15 @@ input:focus {
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-/* Primary Line: Date + Time */
-.slot-primary-line {
+.next-slot-primary {
     font-weight: 700;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--primary);
-    display: flex;
-    gap: 6px;
-    align-items: center;
 }
 
-/* Secondary Line: Specialist */
-.slot-secondary-line {
-    font-size: 11px;
+.next-slot-secondary {
+    font-size: 10px;
     color: var(--text-sub);
-    margin-top: 2px;
-    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -578,9 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
     els.date.addEventListener('change', () => {
         els.nextContainer.classList.add('hidden');
         els.nextContainer.innerHTML = '';
-        // Reset quick days visual state
         els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
-        // Highlight logic if manual date matches a button could go here, but optional
         checkAvailability();
     });
     
@@ -686,17 +679,14 @@ function renderQuickDays() {
 
         // Logic for Today, This Week, Next Week
         if (targetIdx === currentDayIdx && today.getHours() < 17) {
-            // Is Today (and within working hours roughly)
             isToday = true;
             btn.classList.add('is-today');
         } else if (targetIdx < currentDayIdx || (targetIdx === currentDayIdx && today.getHours() >= 17)) {
-            // Passed -> Next Week
             const diff = targetIdx - currentDayIdx + 7;
             targetDate.setDate(today.getDate() + diff);
             isNextWeek = true;
             btn.classList.add('next-week');
         } else {
-            // Upcoming This Week
             const diff = targetIdx - currentDayIdx;
             targetDate.setDate(today.getDate() + diff);
         }
@@ -730,7 +720,6 @@ async function fetchNextAvailableSlots() {
         const data = await res.json();
         
         const currentSpec = els.specId.value;
-        // Logic: Filter by specialist if selected, then take top 4
         let slots = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec).slice(0, 4);
 
         if (slots.length === 0) {
@@ -738,21 +727,17 @@ async function fetchNextAvailableSlots() {
         } else {
             slots.forEach(slot => {
                 const d = new Date(slot.date);
-                // FORMAT: Fri, 28/11 (DD/MM)
                 const day = d.toLocaleDateString(CONFIG.language, { weekday: 'short' });
+                // DD/MM Format
                 const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' });
                 const specName = (CONFIG.specialists.find(s => s.id === slot.specialistId) || {}).name || "Spec";
                 
                 const card = document.createElement('div');
                 card.className = 'next-slot-card';
-                // COMPACT LAYOUT
+                // COMPACT LAYOUT (Double Decker)
                 card.innerHTML = `
-                    <div class="slot-primary-line">
-                        <span>${day} ${dateStr}</span>
-                        <span>•</span>
-                        <span>${slot.startTime.toString().padStart(5, '0')}</span>
-                    </div>
-                    <div class="slot-secondary-line">${specName}</div>
+                    <div class="next-slot-primary">${day} ${dateStr} • ${slot.startTime.toString().padStart(5, '0')}</div>
+                    <div class="next-slot-secondary">${specName}</div>
                 `;
                 card.addEventListener('click', () => {
                     els.date.value = slot.date;
