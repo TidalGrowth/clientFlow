@@ -11,7 +11,7 @@
 :root {
     /* --- LIGHT THEME --- */
     --primary: #1A1A1A;       
-    --secondary: #F5F5F7;     
+    --secondary: #F5F5F7;     /* Standard Pill BG */
     --surface: #FFFFFF;       
     --accent: #2962FF;        
     --accent-hover: #1e4bd1;
@@ -23,14 +23,16 @@
     --pill-bg: #F5F5F7;       
     --pill-hover: #EAEAEA;
     
-    /* NEW: High Contrast for Next Week */
-    --next-week-bg: #333333;
-    --next-week-text: #FFFFFF;
+    /* QUICK DAY COLORS */
+    --day-next-week-bg: #333333;
+    --day-next-week-text: #FFFFFF;
+    --day-today-border: #2962FF;
     
     --danger: #D32F2F;
     --success: #388E3C;
     --success-bg: #EDF7ED;
     
+    /* Spacing & Shape */
     --radius-input: 8px;      
     --radius-pill: 50px;      
     --radius-card: 16px;
@@ -52,8 +54,9 @@ body.dark-mode {
     --pill-bg: #2C2C2C;       
     --pill-hover: #383838;
     
-    --next-week-bg: #555555;
-    --next-week-text: #FFFFFF;
+    --day-next-week-bg: #555555;
+    --day-next-week-text: #FFFFFF;
+    --day-today-border: #5381FF;
     
     --success: #66BB6A;
     --success-bg: rgba(102, 187, 106, 0.1);
@@ -187,6 +190,7 @@ input:focus {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
 }
 
+/* SHARED STYLES */
 .selection-btn, .slot-button, .quick-day-btn {
     background-color: var(--pill-bg);
     border: 1px solid var(--support);
@@ -213,40 +217,53 @@ input:focus {
     transform: translateY(-1px);
 }
 
-/* SELECTED STATE */
+/* SELECTED STATE (Blue) */
 .selection-btn.selected, .slot-button.selected, .quick-day-btn.selected {
-    background-color: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent-text) !important;
     box-shadow: 0 4px 12px rgba(41, 98, 255, 0.25);
     transform: translateY(0);
 }
 
-/* QUICK DAY SPECIAL STYLES */
-.quick-day-btn.next-week {
-    background-color: var(--next-week-bg); /* Dark */
-    color: var(--next-week-text);          /* White */
-    border-color: transparent;
-}
-.quick-day-btn.next-week:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-.quick-day-btn.next-week.selected {
-    background-color: var(--accent);
-    color: var(--accent-text);
-}
-
-#price-display {
-    text-align: right;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    margin-top: 4px;
+.slot-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* =========================================
-   5. NEXT 4 SLOTS (2-COLUMN GRID)
+   5. QUICK DAY SELECTOR (4 COLORS)
+   ========================================= */
+#quick-days-wrapper { margin-bottom: 12px; }
+#quick-days-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
+    gap: 6px;
+}
+
+/* 1. THIS WEEK: Default (.quick-day-btn) */
+
+/* 2. NEXT WEEK: Dark */
+.quick-day-btn.next-week {
+    background-color: var(--day-next-week-bg);
+    color: var(--day-next-week-text);
+    border-color: transparent;
+}
+
+/* 3. TODAY: White with Blue Border */
+.quick-day-btn.is-today {
+    background-color: var(--surface);
+    border: 2px solid var(--day-today-border);
+    color: var(--primary);
+    font-weight: 800; /* Extra bold */
+}
+
+/* 4. SELECTED: Handled by .selected class above (overrides others) */
+
+
+/* =========================================
+   6. NEXT 4 SLOTS (COMPACT & UNIFIED)
    ========================================= */
 #next-slots-wrapper { margin-bottom: 16px; }
 
@@ -271,66 +288,56 @@ input:focus {
     border-style: solid;
 }
 
-/* 2-COLUMN LAYOUT */
 #next-slots-container {
     margin-top: 12px;
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two slots per row */
+    grid-template-columns: 1fr 1fr; /* 2 Columns */
     gap: 8px;
 }
 
+/* COMPACT CARD that looks like a button */
 .next-slot-card {
-    background-color: var(--surface);
+    background-color: var(--pill-bg); /* Match other buttons */
     border: 1px solid var(--support);
     border-radius: 12px;
-    padding: 10px;
+    /* Very tight padding to match button height roughly */
+    padding: 8px 12px; 
     cursor: pointer;
     transition: var(--transition);
     display: flex;
-    flex-direction: column; /* Vertical stack inside small card */
-    align-items: flex-start;
-    gap: 6px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Center content like a button */
+    min-height: 48px; /* Slightly taller than simple button to fit 2 lines */
 }
+
 .next-slot-card:hover {
     border-color: var(--accent);
     background-color: var(--pill-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
-/* HEADER: Date & Specialist */
-.next-slot-info {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-.slot-day-date { font-weight: 700; font-size: 12px; color: var(--primary); }
-.slot-specialist { font-size: 11px; color: var(--text-sub); margin-top: 2px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; max-width: 100%; }
-
-/* TIME PILL inside card */
-.slot-time-badge {
-    background-color: var(--pill-bg); 
+/* Primary Line: Date + Time */
+.slot-primary-line {
+    font-weight: 700;
+    font-size: 13px;
     color: var(--primary);
-    padding: 0 10px; 
-    border-radius: var(--radius-pill);
-    font-weight: 700; 
-    font-size: 12px;
-    border: 1px solid var(--support);
-    height: 28px; /* Slightly smaller for compact card */
     display: flex;
+    gap: 6px;
     align-items: center;
-    justify-content: center;
-    align-self: flex-start; /* Align left */
 }
 
-/* =========================================
-   6. QUICK DAY SELECTOR (LAYOUT)
-   ========================================= */
-#quick-days-wrapper { margin-bottom: 12px; }
-#quick-days-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-    gap: 6px;
+/* Secondary Line: Specialist */
+.slot-secondary-line {
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 2px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 /* =========================================
@@ -341,36 +348,18 @@ input:focus {
     margin-top: 15px;
     font-size: 13px;
 }
-#waitlist-trigger a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-    cursor: pointer;
-}
+#waitlist-trigger a { color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: none; }
 #waitlist-trigger a:hover { text-decoration: underline; }
 
 .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
 }
 .modal-overlay.active { opacity: 1; pointer-events: all; }
 .modal-card {
-    background: var(--surface);
-    padding: 24px;
-    border-radius: var(--radius-card);
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    transform: translateY(20px);
-    transition: transform 0.3s;
+    background: var(--surface); padding: 24px; border-radius: var(--radius-card);
+    width: 90%; max-width: 400px; transform: translateY(20px); transition: transform 0.3s;
 }
 .modal-overlay.active .modal-card { transform: translateY(0); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -378,582 +367,11 @@ input:focus {
 .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-sub); }
 
 /* =========================================
-   8. SUBMIT & STATUS
+   8. PRICE & STATUS
    ========================================= */
+#price-display { text-align: right; font-size: 13px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+
 button[type="submit"], #waitlist-submit {
-    width: 100%;
-    padding: 14px;
-    background-color: var(--accent);
-    color: var(--accent-text);
-    border: none;
-    border-radius: var(--radius-pill);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 12px;
-    transition: var(--transition);
-    box-shadow: 0 4px 10px rgba(41, 98, 255, 0.2);
-}
-button[type="submit"]:disabled {
-    background-color: var(--support);
-    color: var(--text-sub);
-    cursor: not-allowed;
-    box-shadow: none;
-}
-
-#status {
-    margin-top: 16px;
-    padding: 12px;
-    border-radius: var(--radius-input);
-    text-align: center;
-    font-size: 14px;
-    font-weight: 500;
-}
-.error { background-color: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
-.success { background-color: var(--success-bg); color: var(--success); border: 1px solid #c8e6c9; }
-.hidden { display: none; }
-
-</style>
-</head>
-<body>
-
-<div id="banner" class="hidden">
-<img id="client-logo" alt="Client Logo">
-</div>
-
-<div class="container">
-    <div class="header-row">
-        <h2 id="lang-title"></h2>
-        <button class="theme-toggle" id="theme-toggle">
-            <span id="icon-sun">☀️</span>
-            <span id="icon-moon" class="hidden">🌙</span>
-        </button>
-    </div>
-
-    <form id="bookingForm">
-        <div class="form-group">
-            <label for="name" id="lang-name" class="required"></label>
-            <input type="text" id="name" required>
-        </div>
-        <div class="form-group">
-            <label for="email" id="lang-email"></label>
-            <input type="email" id="email" placeholder="Optional">
-        </div>
-        <div id="custom-fields-container"></div>
-
-        <div class="form-group" id="service-module">
-            <label id="lang-service" class="required"></label>
-            <div id="service-container" class="selection-grid"></div>
-            <div id="price-display" class="hidden"></div>
-        </div>
-
-        <div class="form-group hidden" id="specialist-module">
-            <label id="lang-specialist" class="required"></label>
-            <div id="specialist-container" class="selection-grid"></div>
-        </div>
-
-        <div id="next-slots-wrapper">
-            <button type="button" id="btn-next-available">
-                <span>⚡</span> <span id="lang-btn-next">See Next 4 Available Slots</span>
-            </button>
-            <div id="next-slots-container" class="hidden"></div>
-        </div>
-
-        <div class="form-group">
-            <label id="lang-date" class="required"></label>
-            <div id="quick-days-wrapper">
-                <div id="quick-days-container"></div>
-            </div>
-            <input type="date" id="date" required>
-        </div>
-
-        <div class="form-group">
-            <label id="lang-slots"></label>
-            <div id="slot-container" class="selection-grid">
-                <p id="lang-slots-placeholder" style="color:var(--text-sub); margin:0; width: 100%; text-align: center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);"></p>
-            </div>
-            <div id="waitlist-trigger" class="hidden">
-                <p style="margin:0; color:var(--text-sub);">
-                    Can't find a time? <a id="open-waitlist">Join the Waitlist</a>
-                </p>
-            </div>
-        </div>
-
-        <input type="hidden" id="selectedServiceId" required>
-        <input type="hidden" id="selectedServiceDuration" required>
-        <input type="hidden" id="selectedSpecialistId" required>
-        <input type="hidden" id="selectedTimeSlot" required>
-
-        <button type="submit" id="lang-submit" disabled></button>
-    </form>
-
-    <div id="status"></div>
-</div>
-
-<div class="modal-overlay" id="waitlist-modal">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h3>Join Waitlist</h3>
-            <button class="close-modal" id="close-waitlist">×</button>
-        </div>
-        <p style="font-size:13px; color:var(--text-sub); margin-bottom:15px;">
-            If a slot becomes available, we will email you.
-        </p>
-        <form id="waitlistForm">
-            <div class="form-group">
-                <label class="required">Preferred Date Range</label>
-                <input type="text" id="waitlist-range" required>
-            </div>
-            <button type="submit" id="waitlist-submit">Join Waitlist</button>
-        </form>
-    </div>
-</div>
-
-<script>
-const CONFIG = {
-    language: 'en',
-    logoUrl: 'https://files.catbox.moe/jcjk1q.png',
-    
-    SLOT_CHECKER_WEBHOOK: "https://n8n.tidal-growth.com/webhook/check-availability",
-    BOOKING_CREATOR_WEBHOOK: "https://n8n.tidal-growth.com/webhook/booking-creator",
-    NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
-    WAITLIST_WEBHOOK: "https://n8n.tidal-growth.com/webhook/join-waitlist",
-    
-    features: { showPrice: false },
-    workingDays: [1, 2, 3, 4, 5],
-
-    strings: {
-        en: {
-            title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
-            btnNext: "Next 4 Available Slots", btnNextLoading: "Searching...",
-            dayNames: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-            waitlistSuccess: "Added to waitlist!"
-        },
-        de: {
-            title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
-            btnNext: "Nächste 4 freie Termine", btnNextLoading: "Suche...",
-            dayNames: ["SO", "MO", "DI", "MI", "DO", "FR", "SA"],
-            waitlistSuccess: "Zur Warteliste hinzugefügt!"
-        },
-        sl: {
-            title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
-            btnNext: "Naslednji 4 termini", btnNextLoading: "Iščem...",
-            dayNames: ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"],
-            waitlistSuccess: "Dodano na čakalno listo!"
-        }
-    },
-    services: [
-        { id: "SVC_CALL", name: "30 min Call", duration: 30, price: 50 },
-        { id: "SVC_STRATEGY", name: "60 min Strategy", duration: 60, price: 90 },
-        { id: "SVC_PLANNING", name: "90 min Planning", duration: 90, price: 150 },
-        { id: "SVC_COLOR", name: "Full Color (2h)", duration: 120, price: 180 } 
-    ],
-    specialists: [
-        { name: "Specialist A", id: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com" },
-        { name: "Specialist B", id: "c_fe27362b4a113006914e848ceba9d7758c4d4dc1f55d67e7084dc90355e5b499@group.calendar.google.com" }
-    ],
-    defaultSpecialistId: "c_c07cb4ceabf1ace46e1bf3334084b4ce0e33b0cd1de5c673e99a6d31295aa18f@group.calendar.google.com",
-    customFields: [
-        { id: "phone", type: "tel", required: false, labels: { en: "Phone Number", de: "Telefonnummer", sl: "Telefonska številka" } },
-        { id: "goal", type: "text", required: false, labels: { en: "Comment", de: "Kommentar", sl: "Opomba" } }
-    ]
-};
-
-const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
-const els = {
-    customFields: document.getElementById('custom-fields-container'),
-    services: document.getElementById('service-container'),
-    specialists: document.getElementById('specialist-container'),
-    specModule: document.getElementById('specialist-module'),
-    date: document.getElementById('date'),
-    slots: document.getElementById('slot-container'),
-    price: document.getElementById('price-display'),
-    submit: document.getElementById('lang-submit'),
-    status: document.getElementById('status'),
-    form: document.getElementById('bookingForm'),
-    banner: document.getElementById('banner'),
-    logo: document.getElementById('client-logo'),
-    btnNext: document.getElementById('btn-next-available'),
-    nextContainer: document.getElementById('next-slots-container'),
-    langBtnNext: document.getElementById('lang-btn-next'),
-    themeToggle: document.getElementById('theme-toggle'),
-    sun: document.getElementById('icon-sun'),
-    moon: document.getElementById('icon-moon'),
-    quickDays: document.getElementById('quick-days-container'),
-    waitlistTrigger: document.getElementById('waitlist-trigger'),
-    openWaitlist: document.getElementById('open-waitlist'),
-    waitlistModal: document.getElementById('waitlist-modal'),
-    closeWaitlist: document.getElementById('close-waitlist'),
-    waitlistForm: document.getElementById('waitlistForm'),
-    svcId: document.getElementById('selectedServiceId'),
-    svcDur: document.getElementById('selectedServiceDuration'),
-    specId: document.getElementById('selectedSpecialistId'),
-    time: document.getElementById('selectedTimeSlot')
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    applyBranding();
-    applyLanguage();
-    renderCustomFields();
-    renderServices();
-    renderSpecialists();
-    renderQuickDays();
-
-    const today = new Date();
-    els.date.min = today.toISOString().split('T')[0];
-
-    els.date.addEventListener('change', () => {
-        els.nextContainer.classList.add('hidden');
-        els.nextContainer.innerHTML = '';
-        els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
-        checkAvailability();
-    });
-    
-    els.btnNext.addEventListener('click', fetchNextAvailableSlots);
-    els.form.addEventListener('submit', handleFormSubmission);
-    els.themeToggle.addEventListener('click', toggleTheme);
-    
-    els.openWaitlist.addEventListener('click', () => els.waitlistModal.classList.add('active'));
-    els.closeWaitlist.addEventListener('click', () => els.waitlistModal.classList.remove('active'));
-    els.waitlistForm.addEventListener('submit', handleWaitlistSubmission);
-});
-
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    els.sun.classList.toggle('hidden', isDark);
-    els.moon.classList.toggle('hidden', !isDark);
-}
-
-function applyBranding() {
-    if (CONFIG.logoUrl) {
-        els.logo.src = CONFIG.logoUrl;
-        els.banner.classList.remove('hidden');
-    }
-}
-
-function applyLanguage() {
-    document.getElementById('lang-title').textContent = lang.title;
-    document.getElementById('lang-name').textContent = lang.name;
-    document.getElementById('lang-email').textContent = lang.email;
-    document.getElementById('lang-service').textContent = lang.service;
-    document.getElementById('lang-specialist').textContent = lang.specialist;
-    document.getElementById('lang-date').textContent = lang.date;
-    document.getElementById('lang-slots').textContent = lang.slots;
-    document.getElementById('lang-slots-placeholder').textContent = lang.slotsPlaceholder;
-    els.submit.textContent = lang.submit;
-    els.langBtnNext.textContent = lang.btnNext;
-}
-
-function renderCustomFields() {
-    CONFIG.customFields.forEach(field => {
-        const div = document.createElement('div');
-        div.className = 'form-group';
-        div.innerHTML = `<label for="${field.id}" class="${field.required ? 'required' : ''}">${field.labels[CONFIG.language]}</label>
-                         <input type="${field.type}" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>`;
-        els.customFields.appendChild(div);
-    });
-}
-
-function renderServices() {
-    els.services.innerHTML = '';
-    CONFIG.services.forEach(svc => {
-        const btn = createBtn(svc.name, 'service-btn', { 'data-duration': svc.duration, 'data-price': svc.price, 'data-id': svc.id });
-        btn.addEventListener('click', () => {
-            handleSelection(btn, els.services, els.svcId, svc.id);
-            els.svcDur.value = svc.duration;
-            if (CONFIG.features.showPrice && svc.price) {
-                els.price.textContent = `${lang.pricePrefix}${svc.price}${lang.priceSuffix}`;
-                els.price.classList.remove('hidden');
-            } else { els.price.classList.add('hidden'); }
-            els.nextContainer.classList.add('hidden');
-            checkAvailability();
-        });
-        els.services.appendChild(btn);
-    });
-}
-
-function renderSpecialists() {
-    if (CONFIG.specialists.length === 0) {
-        els.specId.value = CONFIG.defaultSpecialistId;
-        els.specModule.classList.add('hidden');
-        return;
-    }
-    els.specModule.classList.remove('hidden');
-    CONFIG.specialists.forEach(spec => {
-        const btn = createBtn(spec.name, 'specialist-btn', { 'data-id': spec.id });
-        btn.addEventListener('click', () => {
-            if (btn.classList.contains('selected')) {
-                btn.classList.remove('selected');
-                els.specId.value = ''; 
-            } else {
-                handleSelection(btn, els.specialists, els.specId, spec.id);
-            }
-            els.nextContainer.classList.add('hidden');
-            checkAvailability();
-        });
-        els.specialists.appendChild(btn);
-    });
-}
-
-function renderQuickDays() {
-    els.quickDays.innerHTML = '';
-    const today = new Date();
-    const currentDayIdx = today.getDay(); 
-
-    CONFIG.workingDays.forEach(targetIdx => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'quick-day-btn';
-        
-        const targetDate = new Date(today);
-        if (targetIdx < currentDayIdx || (targetIdx === currentDayIdx && today.getHours() >= 17)) {
-            const diff = targetIdx - currentDayIdx + 7;
-            targetDate.setDate(today.getDate() + diff);
-            btn.classList.add('next-week'); 
-        } else {
-            const diff = targetIdx - currentDayIdx;
-            targetDate.setDate(today.getDate() + diff);
-        }
-
-        const isoDate = targetDate.toISOString().split('T')[0];
-        btn.textContent = lang.dayNames[targetIdx]; 
-        
-        btn.addEventListener('click', () => {
-            els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            els.date.value = isoDate;
-            els.nextContainer.classList.add('hidden');
-            checkAvailability();
-        });
-        els.quickDays.appendChild(btn);
-    });
-}
-
-async function fetchNextAvailableSlots() {
-    if (!els.svcId.value) { alert("Please select a service first."); return; }
-    
-    const originalText = els.langBtnNext.textContent;
-    els.langBtnNext.textContent = lang.btnNextLoading;
-    els.btnNext.disabled = true;
-    els.nextContainer.innerHTML = '';
-    els.nextContainer.classList.remove('hidden');
-
-    try {
-        const res = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK);
-        if (!res.ok) throw new Error("API Error");
-        const data = await res.json();
-        
-        const currentSpec = els.specId.value;
-        // LOGIC FIX: Filter first, THEN slice top 4
-        let slots = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec).slice(0, 4);
-
-        if (slots.length === 0) {
-            els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:13px; grid-column:span 2;">${lang.statusNoSlots}</p>`;
-        } else {
-            slots.forEach(slot => {
-                const d = new Date(slot.date);
-                const day = d.toLocaleDateString(CONFIG.language, { weekday: 'short' });
-                const dateStr = d.toLocaleDateString(CONFIG.language, { day: 'numeric', month: 'numeric' });
-                const specName = (CONFIG.specialists.find(s => s.id === slot.specialistId) || {}).name || "Spec";
-                
-                const card = document.createElement('div');
-                card.className = 'next-slot-card';
-                card.innerHTML = `
-                    <div class="next-slot-info">
-                        <span class="slot-day-date">${day}, ${dateStr}</span>
-                        <span class="slot-specialist">${specName}</span>
-                    </div>
-                    <span class="slot-time-badge">${slot.startTime.toString().padStart(5, '0')}</span>
-                `;
-                card.addEventListener('click', () => {
-                    els.date.value = slot.date;
-                    if (!els.specId.value || els.specId.value !== slot.specialistId) {
-                        els.specId.value = slot.specialistId;
-                        els.specialists.querySelectorAll('.specialist-btn').forEach(b => {
-                            if (b.getAttribute('data-id') === slot.specialistId) handleSelection(b, els.specialists, els.specId, slot.specialistId);
-                        });
-                    }
-                    els.nextContainer.classList.add('hidden');
-                    autoSelectTime(slot.startTime);
-                });
-                els.nextContainer.appendChild(card);
-            });
-        }
-    } catch (e) {
-        els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--danger); font-size:13px; grid-column:span 2;">${lang.statusError}</p>`;
-    } finally {
-        els.langBtnNext.textContent = originalText;
-        els.btnNext.disabled = false;
-    }
-}
-
-async function autoSelectTime(target) {
-    await checkAvailability();
-    setTimeout(() => {
-        let found = false;
-        els.slots.querySelectorAll('.slot-button').forEach(btn => {
-            const t1 = btn.getAttribute('data-time').replace(/^0/, '');
-            const t2 = target.replace(/^0/, '');
-            if (t1 === t2) {
-                btn.click();
-                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                found = true;
-            }
-        });
-    }, 100);
-}
-
-async function checkAvailability() {
-    const { value: date } = els.date;
-    const { value: worker } = els.specId;
-    const { value: svc } = els.svcId;
-    const { value: dur } = els.svcDur;
-
-    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusLoading}</p>`;
-    els.time.value = '';
-    els.submit.disabled = true;
-    els.waitlistTrigger.classList.add('hidden');
-
-    if (!date || !svc) {
-        els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
-        return;
-    }
-
-    const checkWorker = worker || CONFIG.defaultSpecialistId;
-
-    try {
-        const res = await fetch(CONFIG.SLOT_CHECKER_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dateString: date, workerId: checkWorker, serviceId: svc, duration: dur })
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        const slots = Array.isArray(data) ? data : data.slots;
-        
-        els.slots.innerHTML = '';
-        if (!slots || slots.length === 0) {
-            els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center;">${lang.statusNoSlots}</p>`;
-            els.waitlistTrigger.classList.remove('hidden'); 
-        } else {
-            slots.forEach(t => {
-                const btn = createBtn(t, 'slot-button', { 'data-time': t });
-                btn.addEventListener('click', () => {
-                    handleSelection(btn, els.slots, els.time, t);
-                    els.submit.disabled = false;
-                });
-                els.slots.appendChild(btn);
-            });
-        }
-    } catch (e) {
-        els.slots.innerHTML = `<p class="error" style="margin:0; text-align:center;">${lang.statusError}</p>`;
-    }
-}
-
-async function handleFormSubmission(e) {
-    e.preventDefault();
-    els.submit.disabled = true;
-    els.submit.textContent = lang.statusBooking;
-    els.status.textContent = lang.statusBooking;
-    els.status.className = '';
-
-    const payload = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        bookingStartTime: `${els.date.value}T${els.time.value}:00.000Z`,
-        serviceId: els.svcId.value,
-        specialistId: els.specId.value || CONFIG.defaultSpecialistId,
-        clientName: document.getElementById('name').value,
-        customData: {}
-    };
-    CONFIG.customFields.forEach(f => {
-        const el = document.getElementById(f.id);
-        if (el) payload.customData[f.id] = el.value;
-    });
-
-    try {
-        const res = await fetch(CONFIG.BOOKING_CREATOR_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (res.ok && json.status === 'success') {
-            els.status.className = 'success';
-            els.status.textContent = lang.statusSuccess;
-            els.form.reset();
-            clearAll();
-            els.nextContainer.classList.add('hidden');
-        } else { throw new Error(json.message || res.statusText); }
-    } catch (err) {
-        els.status.className = 'error';
-        els.status.textContent = `${lang.statusFailed}${err.message}`;
-    } finally {
-        els.submit.disabled = false;
-        els.submit.textContent = lang.submit;
-    }
-}
-
-async function handleWaitlistSubmission(e) {
-    e.preventDefault();
-    const btn = document.getElementById('waitlist-submit');
-    btn.disabled = true;
-    btn.textContent = "Sending...";
-    
-    const payload = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone') ? document.getElementById('phone').value : "",
-        range: document.getElementById('waitlist-range').value,
-        serviceId: els.svcId.value,
-        specialistId: els.specId.value
-    };
-
-    try {
-        const res = await fetch(CONFIG.WAITLIST_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (res.ok) {
-            alert(lang.waitlistSuccess);
-            els.waitlistModal.classList.remove('active');
-        } else {
-            alert(lang.statusError);
-        }
-    } catch (err) {
-        alert(lang.statusError);
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "Join Waitlist";
-    }
-}
-
-function createBtn(txt, cls, attrs) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = cls + ' selection-btn';
-    b.textContent = txt;
-    for (const k in attrs) b.setAttribute(k, attrs[k]);
-    return b;
-}
-
-function handleSelection(btn, container, input, val) {
-    container.querySelectorAll('.selection-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    input.value = val;
-}
-
-function clearAll() {
-    document.querySelectorAll('.selection-btn.selected').forEach(b => b.classList.remove('selected'));
-    els.slots.innerHTML = `<p style="color:var(--text-sub); margin:0; width:100%; text-align:center; padding: 15px 0; font-size: 13px; border: 1px dashed var(--support); border-radius: var(--radius-input);">${lang.slotsPlaceholder}</p>`;
-    els.price.classList.add('hidden');
-    els.svcId.value = ''; els.svcDur.value = ''; els.time.value = '';
-    els.specId.value = CONFIG.specialists.length ? '' : CONFIG.defaultSpecialistId;
-    els.submit.disabled = true;
-    if (els.quickDays) els.quickDays.querySelectorAll('.quick-day-btn').forEach(b => b.classList.remove('selected'));
-}
-</script>
-</body>
-</html>
+    width: 100%; padding: 14px; background-color: var(--accent); color: var(--accent-text);
+    border: none; border-radius: var(--radius-pill); font-size: 16px; font-weight: 600;
+    cursor: pointer; margin-top: 12px; transition: var
