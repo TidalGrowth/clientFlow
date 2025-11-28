@@ -6,14 +6,14 @@
 <title id="lang-title-tag"></title>
 <style>
 /* =========================================
-   1. DESIGN SYSTEM
+   1. DESIGN SYSTEM & VARIABLES
    ========================================= */
 :root {
     /* --- LIGHT THEME --- */
     --primary: #1A1A1A;       
     --secondary: #F5F5F7;     
     --surface: #FFFFFF;       
-    --accent: #2962FF;        
+    --accent: #2962FF;        /* Royal Blue */
     --accent-hover: #1e4bd1;
     --accent-text: #FFFFFF;
     --support: #E0E0E0;       
@@ -23,10 +23,16 @@
     --pill-bg: #F5F5F7;       
     --pill-hover: #EAEAEA;
     
-    /* QUICK DAY COLORS */
-    --day-default-bg: #F5F5F7;        /* This Week */
-    --day-next-week-bg: #333333;      /* Next Week */
-    --day-next-week-text: #FFFFFF;
+    /* QUICK DAY PALETTE (LIVELY) */
+    --day-default-bg: #F5F5F7;        
+    --day-default-text: #1A1A1A;
+    
+    /* Next Week: Lavender Splash */
+    --day-next-week-bg: #F3E5F5;      
+    --day-next-week-text: #7B1FA2;    
+    
+    /* Today: High Visibility */
+    --day-today-bg: #FFFFFF;
     --day-today-border: #2962FF;
     
     --danger: #D32F2F;
@@ -54,9 +60,12 @@ body.dark-mode {
     --pill-bg: #2C2C2C;       
     --pill-hover: #383838;
     
+    /* Dark Mode Day Palette */
     --day-default-bg: #2C2C2C;
-    --day-next-week-bg: #555555;
-    --day-next-week-text: #FFFFFF;
+    --day-default-text: #EAEAEA;
+    --day-next-week-bg: #4A148C; /* Deep Purple */
+    --day-next-week-text: #E1BEE7;
+    --day-today-bg: #1E1E1E;
     --day-today-border: #5381FF;
     
     --success: #66BB6A;
@@ -154,43 +163,33 @@ input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px 
 .slot-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* =========================================
-   6. QUICK DAY SELECTOR (FIXED)
+   6. QUICK DAY SELECTOR (LIVELY)
    ========================================= */
 #quick-days-wrapper { margin-bottom: 12px; }
+#quick-days-container { display: flex; gap: 6px; width: 100%; }
 
-#quick-days-container {
-    display: flex; /* Forces single row */
-    gap: 6px;
-    width: 100%;
+.quick-day-btn { 
+    flex: 1; min-width: 0; padding: 0; font-size: 12px; 
+    background-color: var(--day-default-bg);
+    color: var(--day-default-text);
 }
 
-.quick-day-btn {
-    flex: 1; /* Equal width stretch */
-    min-width: 0; /* Prevents overflow */
-    padding: 0; /* Remove padding to fit text */
-    font-size: 12px; /* Slightly smaller for 3 letters */
-}
-
-/* 4-COLOR SYSTEM */
-/* 1. This Week (Default) -> Gray Pill */
-/* 2. Next Week -> Dark Pill */
+/* Next Week: Lavender Splash */
 .quick-day-btn.next-week {
     background-color: var(--day-next-week-bg);
     color: var(--day-next-week-text);
     border-color: transparent;
 }
-/* 3. Today -> White with Blue Border */
+/* Today: Clean White with Blue Border */
 .quick-day-btn.is-today {
-    background-color: var(--surface);
+    background-color: var(--day-today-bg);
     border: 2px solid var(--day-today-border);
     color: var(--primary);
     font-weight: 800;
 }
-/* 4. Selected -> Blue (Handled by .selected class above) */
-
 
 /* =========================================
-   7. NEXT 4 SLOTS (ULTRA COMPACT)
+   7. NEXT 4 SLOTS (COMPACT & UPPERCASE)
    ========================================= */
 #next-slots-wrapper { margin-bottom: 16px; }
 #btn-next-available {
@@ -202,22 +201,21 @@ input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px 
 
 #next-slots-container { margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-/* COMPACT CARD BUTTON */
 .next-slot-card {
-    background-color: var(--pill-bg); /* Matches other buttons */
-    border: 1px solid var(--support);
-    border-radius: var(--radius-pill); /* Pill Shape */
-    padding: 0 10px; /* Minimal padding */
-    cursor: pointer; transition: var(--transition);
+    background-color: var(--pill-bg); border: 1px solid var(--support); border-radius: var(--radius-pill);
+    padding: 0 10px; cursor: pointer; transition: var(--transition);
     display: flex; flex-direction: column; justify-content: center; align-items: center; 
-    height: 38px; /* EXACTLY SAME HEIGHT AS BUTTONS */
-    line-height: 1;
+    height: 38px; line-height: 1;
 }
 .next-slot-card:hover {
     border-color: var(--accent); background-color: var(--pill-hover); transform: translateY(-2px);
 }
 
-.next-slot-primary { font-weight: 700; font-size: 12px; color: var(--primary); margin-bottom: 2px; }
+/* Primary line is UPPERCASE for days */
+.next-slot-primary { 
+    font-weight: 700; font-size: 12px; color: var(--primary); margin-bottom: 1px; 
+    text-transform: uppercase; /* FRI instead of Fri */
+}
 .next-slot-secondary { font-size: 9px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 /* =========================================
@@ -242,7 +240,7 @@ input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px 
    ========================================= */
 #price-display { text-align: right; font-size: 13px; font-weight: 600; color: var(--accent); margin-top: 4px; }
 
-button[type="submit"] {
+button[type="submit"], #waitlist-submit {
     width: 100%; padding: 14px; background-color: var(--accent); color: var(--accent-text);
     border: none; border-radius: var(--radius-pill); font-size: 16px; font-weight: 600;
     cursor: pointer; margin-top: 12px; transition: var(--transition);
@@ -254,6 +252,22 @@ button[type="submit"]:disabled { background-color: var(--support); color: var(--
 .error { background-color: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; }
 .success { background-color: var(--success-bg); color: var(--success); border: 1px solid #c8e6c9; }
 .hidden { display: none; }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center;
+    z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: all; }
+.modal-card {
+    background: var(--surface); padding: 24px; border-radius: var(--radius-card);
+    width: 90%; max-width: 400px; transform: translateY(20px); transition: transform 0.3s;
+}
+.modal-overlay.active .modal-card { transform: translateY(0); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { margin: 0; font-size: 18px; color: var(--primary); }
+.close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-sub); }
 
 </style>
 </head>
@@ -273,8 +287,8 @@ button[type="submit"]:disabled { background-color: var(--support); color: var(--
     </div>
 
     <div id="view-toggle-container">
-        <button class="view-btn active" id="view-btn-book">Book Slot</button>
-        <button class="view-btn" id="view-btn-waitlist">Join Waitlist</button>
+        <button class="view-btn active" id="view-btn-book"></button>
+        <button class="view-btn" id="view-btn-waitlist"></button>
     </div>
 
     <form id="bookingForm">
@@ -302,7 +316,7 @@ button[type="submit"]:disabled { background-color: var(--support); color: var(--
         <div id="booking-module">
             <div id="next-slots-wrapper">
                 <button type="button" id="btn-next-available">
-                    <span>⚡</span> <span id="lang-btn-next">See Next 4 Available Slots</span>
+                    <span>⚡</span> <span id="lang-btn-next"></span>
                 </button>
                 <div id="next-slots-container" class="hidden"></div>
             </div>
@@ -324,18 +338,18 @@ button[type="submit"]:disabled { background-color: var(--support); color: var(--
         </div>
 
         <div id="waitlist-module" class="hidden">
-            <label class="required">Preferred Date Range</label>
+            <label class="required" id="lang-pref-range">Preferred Date Range</label>
             <div id="waitlist-presets">
-                <button type="button" class="preset-btn" data-range="this-week">This Week</button>
-                <button type="button" class="preset-btn" data-range="next-week">Next Week</button>
-                <button type="button" class="preset-btn" data-range="this-month">This Month</button>
+                <button type="button" class="preset-btn" data-range="this-week" id="lang-this-week">This Week</button>
+                <button type="button" class="preset-btn" data-range="next-week" id="lang-next-week">Next Week</button>
+                <button type="button" class="preset-btn" data-range="this-month" id="lang-this-month">This Month</button>
             </div>
             <div class="date-range-row">
                 <div class="form-group">
-                    <input type="date" id="waitlist-start" placeholder="From">
+                    <input type="date" id="waitlist-start">
                 </div>
                 <div class="form-group">
-                    <input type="date" id="waitlist-end" placeholder="To">
+                    <input type="date" id="waitlist-end">
                 </div>
             </div>
         </div>
@@ -361,7 +375,10 @@ const CONFIG = {
     NEXT_AVAILABLE_WEBHOOK: "https://n8n.tidal-growth.com/webhook/next-available",
     WAITLIST_WEBHOOK: "https://n8n.tidal-growth.com/webhook/join-waitlist",
     
-    features: { showPrice: false },
+    features: { 
+        showPrice: false,
+        showBanner: false // Modular toggle
+    },
     workingDays: [1, 2, 3, 4, 5], // Mon-Fri
 
     strings: {
@@ -369,22 +386,25 @@ const CONFIG = {
             title: "Book a Slot", name: "Name", email: "Email", service: "Select Service", specialist: "Select Specialist", date: "Select Date", slots: "Available Time Slots", slotsPlaceholder: "Select service and date", submit: "Book Appointment", pricePrefix: "Total: ", priceSuffix: " €", statusLoading: "Loading...", statusNoSlots: "No slots available.", statusError: "Error.", statusBooking: "Booking...", statusSuccess: "Success! Appointment confirmed.", statusFailed: "Booking failed: ",
             btnNext: "Next 4 Available Slots", btnNextLoading: "Searching...",
             dayNames: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-            viewBook: "Book Slot", viewWaitlist: "Join Waitlist",
-            btnWaitlist: "Join Waitlist", waitlistSuccess: "Added to waitlist!"
+            viewBook: "Book Slot", viewWaitlist: "Waitlist",
+            btnWaitlist: "Join Waitlist", waitlistSuccess: "Added to waitlist!",
+            prefRange: "Preferred Date Range", thisWeek: "This Week", nextWeek: "Next Week", thisMonth: "This Month"
         },
         de: {
             title: "Termin buchen", name: "Name", email: "E-Mail", service: "Dienstleistung", specialist: "Spezialist", date: "Datum", slots: "Verfügbare Termine", slotsPlaceholder: "Dienstleistung und Datum wählen", submit: "Buchen", pricePrefix: "Gesamt: ", priceSuffix: " €", statusLoading: "Wird geladen...", statusNoSlots: "Keine Termine.", statusError: "Fehler.", statusBooking: "Buchen...", statusSuccess: "Erfolg!", statusFailed: "Fehler: ",
             btnNext: "Nächste 4 freie Termine", btnNextLoading: "Suche...",
             dayNames: ["SO", "MO", "DI", "MI", "DO", "FR", "SA"],
             viewBook: "Termin", viewWaitlist: "Warteliste",
-            btnWaitlist: "Auf Warteliste", waitlistSuccess: "Hinzugefügt!"
+            btnWaitlist: "Auf Warteliste", waitlistSuccess: "Hinzugefügt!",
+            prefRange: "Bevorzugter Zeitraum", thisWeek: "Diese Woche", nextWeek: "Nächste Woche", thisMonth: "Diesen Monat"
         },
         sl: {
             title: "Rezervirajte termin", name: "Ime in Priimek", email: "E-pošta", service: "Storitev", specialist: "Specialist", date: "Datum", slots: "Prosti termini", slotsPlaceholder: "Izberite storitev in datum", submit: "Rezerviraj", pricePrefix: "Skupaj: ", priceSuffix: " €", statusLoading: "Nalaganje...", statusNoSlots: "Ni terminov.", statusError: "Napaka.", statusBooking: "Rezerviram...", statusSuccess: "Uspešno!", statusFailed: "Napaka: ",
             btnNext: "Naslednji 4 termini", btnNextLoading: "Iščem...",
             dayNames: ["NED", "PON", "TOR", "SRE", "ČET", "PET", "SOB"],
-            viewBook: "Rezervacija", viewWaitlist: "Čakalna Lista",
-            btnWaitlist: "Na čakalno listo", waitlistSuccess: "Dodano na čakalno listo!"
+            viewBook: "Rezervacija", viewWaitlist: "Čakalna Vrsta",
+            btnWaitlist: "Na čakalno listo", waitlistSuccess: "Dodano na čakalno listo!",
+            prefRange: "Želeno obdobje", thisWeek: "Ta teden", nextWeek: "Naslednji teden", thisMonth: "Ta mesec"
         }
     },
     services: [
@@ -405,7 +425,6 @@ const CONFIG = {
 };
 
 const lang = CONFIG.strings[CONFIG.language] || CONFIG.strings['en'];
-// State
 let currentView = 'booking'; 
 
 const els = {
@@ -625,7 +644,7 @@ function toggleTheme() {
 }
 
 function applyBranding() {
-    if (CONFIG.logoUrl) {
+    if (CONFIG.features.showBanner && CONFIG.logoUrl) {
         els.logo.src = CONFIG.logoUrl;
         els.banner.classList.remove('hidden');
     }
@@ -645,6 +664,10 @@ function applyLanguage() {
     
     document.getElementById('view-btn-book').textContent = lang.viewBook;
     document.getElementById('view-btn-waitlist').textContent = lang.viewWaitlist;
+    document.getElementById('lang-pref-range').textContent = lang.prefRange;
+    document.getElementById('lang-this-week').textContent = lang.thisWeek;
+    document.getElementById('lang-next-week').textContent = lang.nextWeek;
+    document.getElementById('lang-this-month').textContent = lang.thisMonth;
 }
 
 function renderCustomFields() {
@@ -752,8 +775,29 @@ async function fetchNextAvailableSlots() {
         const res = await fetch(CONFIG.NEXT_AVAILABLE_WEBHOOK);
         if (!res.ok) throw new Error("API Error");
         const data = await res.json();
+        
         const currentSpec = els.specId.value;
-        let slots = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec).slice(0, 4);
+        const requiredDuration = parseInt(els.svcDur.value) || 30;
+        
+        let candidates = (data.slots || []).filter(s => !currentSpec || s.specialistId === currentSpec);
+
+        const toMins = (t) => {
+            const [h, m] = t.split(':').map(Number);
+            return h * 60 + m;
+        };
+        const endDayMins = CONFIG.workEndHour * 60; 
+        const lunchStartMins = CONFIG.lunchStartHour * 60; 
+        const lunchEndMins = CONFIG.lunchEndHour * 60;
+
+        candidates = candidates.filter(slot => {
+            const startMins = toMins(slot.startTime);
+            const endMins = startMins + requiredDuration;
+            if (endMins > endDayMins) return false;
+            if (startMins < lunchEndMins && endMins > lunchStartMins) return false;
+            return true;
+        });
+
+        let slots = candidates.slice(0, 4);
 
         if (slots.length === 0) {
             els.nextContainer.innerHTML = `<p style="text-align:center; color:var(--text-sub); font-size:13px; grid-column:span 2;">${lang.statusNoSlots}</p>`;
@@ -761,13 +805,11 @@ async function fetchNextAvailableSlots() {
             slots.forEach(slot => {
                 const d = new Date(slot.date);
                 const day = d.toLocaleDateString(CONFIG.language, { weekday: 'short' });
-                // FORCE DD/MM FORMAT
                 const dateStr = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}`;
                 const specName = (CONFIG.specialists.find(s => s.id === slot.specialistId) || {}).name || "Spec";
                 
                 const card = document.createElement('div');
                 card.className = 'next-slot-card';
-                // ULTRA COMPACT LAYOUT
                 card.innerHTML = `
                     <div class="next-slot-primary">${day} ${dateStr} • ${slot.startTime.toString().padStart(5, '0')}</div>
                     <div class="next-slot-secondary">${specName}</div>
